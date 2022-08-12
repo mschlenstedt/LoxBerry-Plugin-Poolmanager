@@ -1,8 +1,0 @@
-{
-   "password" : "gRundig24",
-   "port" : "1883",
-   "server" : "192.168.3.212",
-   "topic" : "poolmanager",
-   "usemqttgateway" : "false",
-   "username" : "loxberry"
-}

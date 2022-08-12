@@ -1,0 +1,14 @@
+# -*- coding: utf-8 -*-
+import json
+devices=dict()
+with open('plugin.json') as f:
+    pconfig = json.load(f)
+for item in pconfig['sensors']:
+    devices[item["address"]] = item
+for item in pconfig['actors']:
+    devices[item["address"]] = item
+
+for x in devices:
+	print (x)
+	if x == 99:
+		print ("Found")
