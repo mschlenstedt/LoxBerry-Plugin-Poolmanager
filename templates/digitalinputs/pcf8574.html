@@ -1,0 +1,122 @@
+<div data-role="popup" id="popup_digitalinput_pcf8574" data-position-to="window" data-transition="flip" data-theme="a" and data-overlay-theme="a" data-dismissible="true" class="ui-content">
+	<form id="form_digitalinput_pcf8574">
+		<h3 class="boxtitle ui-title">
+			<span style="vertical-align:middle"><img src="./images/chip_title_32.png"></span>
+			<TMPL_VAR INPUTS.LABEL_TITLE_DIGITALINPUT>: pcf8574
+		</h3>
+
+		<div class="box">
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_MODULENAME>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="gpiomodule_digitalinput_pcf8574" data-mini="true" value="" disabled="disabled">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR COMMON.LABEL_NAME>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="name_digitalinput_pcf8574" data-mini="true" value="" placeholder="<TMPL_VAR COMMON.LABEL_NAME_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_PIN>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<select name="pin_digitalinput_pcf8574" id="pin_digitalinput_pcf8574" data-mini="true">
+							<option value="0">P0</option>
+							<option value="1">P1</option>
+							<option value="2">P2</option>
+							<option value="3">P3</option>
+							<option value="4">P4</option>
+							<option value="5">P5</option>
+							<option value="6">P6</option>
+							<option value="7">P7</option>
+						</select>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_PAYLOAD_ON>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="payload_on_digitalinput_pcf8574" data-mini="true" value="ON">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_PAYLOAD_OFF>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="payload_off_digitalinput_pcf8574" data-mini="true" value="OFF">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="checkbox" name="inverted_digitalinput_pcf8574" id="inverted_digitalinput_pcf8574" data-mini="true">
+						<label for="inverted_digitalinput_pcf8574"><TMPL_VAR INPUTS.LABEL_INVERTED></label>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_RESISTOR>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<select name="resistor_digitalinput_pcf8574" id="resistor_digitalinput_pcf8574" data-mini="true">
+							<option value="none"><TMPL_VAR COMMON.LABEL_NONE></option>
+							<option value="pullup" selected>Pull-Up</option>
+							<option value="pulldown">Pull-Down</option>
+						</select>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_INTERRUPT>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<select name="interrupt_digitalinput_pcf8574" id="interrupt_digitalinput_pcf8574" data-mini="true">
+							<option value="none"><TMPL_VAR COMMON.LABEL_NONE></option>
+							<option value="both" selected><TMPL_VAR INPUTS.LABEL_BOTH></option>
+							<option value="rising"><TMPL_VAR INPUTS.LABEL_RISING></option>
+							<option value="falling"><TMPL_VAR INPUTS.LABEL_FALLING></option>
+						</select>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_POLLINTERVAL>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="pollinterval_digitalinput_pcf8574" data-mini="true" value="1">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_BOUNCETIME>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="bouncetime_digitalinput_pcf8574" data-mini="true" value="180">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 90%">
+						<input type="hidden" id="edit_digitalinput_pcf8574" value="">
+						<a href="#" onclick="add_digitalinput('pcf8574'); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "COMMON.BUTTON_SAVE"></a>
+						<a href="#" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-delete ui-corner-all" data-rel="back"><TMPL_VAR COMMON.BUTTON_CANCEL></a>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 90%">
+						<span id="savinghint_digitalinput_pcf8574">&nbsp;</span>
+					</div>
+			</div>
+		</div>
+	</form>
+</div>
+

@@ -1,0 +1,259 @@
+<style>
+.datahidden {
+	display:none;
+}
+
+.tiny {
+	font-size:70%;
+}
+
+.small {
+	font-size:80%;
+}
+
+.middle {
+	font-size:120%;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.grayed {
+	color: gray;
+}
+
+.center {
+	text-align: center;
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	grid-column-gap: 15px;
+	grid-row-gap: 15px;
+	text-shadow: none;
+}
+
+.box { 
+	border: 1px solid black;
+	border-radius: 5px 5px 5px 5px;
+	padding: 5px;
+}
+
+.boxtitle {
+	background-color: #6dac20;
+	color: white;
+	text-shadow: 1px 1px 2px black;
+	border-radius: 5px 5px 5px 5px;
+	padding: 5px;
+	vertical-align: middle;
+}
+
+.boxrow {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
+	align-items: center;
+	padding: 0;
+	margin: 0;
+}
+
+.boxitem {
+	padding: 5px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.servicestatus {
+	display: grid;
+	grid-template-columns: auto auto auto auto;
+	grid-template-rows: 1fr;
+	gap: 0px 10px;
+	justify-content: center;
+	justify-items: center;
+	align-items: center;
+	text-shadow: none;
+}
+
+.margin {
+	margin: 10px;
+}
+
+.status {
+	padding: 7px;
+	box-sizing: border-box;
+	border-radius: 5px 5px 5px 5px;
+	background: #dfdfdf;
+	border: 1px solid #7E7E7E;
+	width: 170px;
+	text-align: center;
+}
+
+.ui-popup-container
+{
+	width:  50%;
+	height: 80%;
+}
+
+</style>
+
+<div class="servicestatus">
+	<div>
+		Service Status:
+	</div>
+	<div id="servicestatusicon">
+		<img src="./images/unknown_20.png">
+	</div>
+	<div class="status" id="servicestatus">
+		<TMPL_VAR "GPIOS.LABEL_UNKNOWN">
+	</div>
+	<div>
+		<a href="#" onclick="servicerestart();return false;" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all">Refresh</a>
+	</div>
+
+</div>
+
+<br>
+
+<div class="grid">
+	<div>
+		<h2 class="boxtitle ui-title">
+			<span style="vertical-align:middle"><img src="./images/chip_title_32.png"></span>
+			<TMPL_VAR "GPIOS.LABEL_GPIOMODULES">
+		</h2>
+		<div class="box">
+			<div class="boxrow">
+					<div class="boxitem small">
+						<TMPL_VAR "GPIOS.LABEL_ADD_GPIOMODULE">
+					</div>
+					<div class="boxitem" style="width:200px">
+							<select name="gpio_module" id="gpio_module" data-mini="true">
+								<TMPL_VAR "GPIO_MODULE_OPTIONS">
+							</select>
+					</div>
+					<div class="boxitem">
+							<a href="#" onclick="popup_add_gpiomodule(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-plus ui-corner-all"><TMPL_VAR "COMMON.BUTTON_ADD"></a>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem" style="width:500px">
+						<!-- Table -->
+						<div id="gpiomodules-list"></div>
+					</div>
+			</div>
+		</div>
+	</div>
+
+	<div>
+		<h2 class="boxtitle ui-title">
+			<span style="vertical-align:middle"><img src="./images/input_title_32.png"></span>
+			<TMPL_VAR "GPIOS.LABEL_INPUTS">
+		</h2>
+		<div class="box">
+			<div class="boxrow">
+					<div class="boxitem small">
+						<TMPL_VAR "INPUTS.LABEL_ADD_DIGITALINPUT">
+					</div>
+					<div class="boxitem" style="width:200px">
+							<select name="digitalinput_module" id="digitalinput_module" data-mini="true">
+							</select>
+					</div>
+					<div class="boxitem">
+							<a href="#" onclick="popup_add_digitalinput(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-plus ui-corner-all"><TMPL_VAR "COMMON.BUTTON_ADD"></a>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem" style="width:500px">
+						<!-- Table -->
+						<div id="digitalinputs-list"></div>
+					</div>
+			</div>
+		</div>
+	</div>
+	<div>
+		<h2 class="boxtitle ui-title">
+			<span style="vertical-align:middle"><img src="./images/output_title_32.png"></span>
+			<TMPL_VAR "GPIOS.LABEL_OUTPUTS">
+		</h2>
+		<div class="box">
+			<div class="boxrow">
+					<div class="boxitem small">
+						<TMPL_VAR "OUTPUTS.LABEL_ADD_DIGITALOUTPUT">
+					</div>
+					<div class="boxitem" style="width:200px">
+							<select name="digitaloutput_module" id="digitaloutput_module" data-mini="true">
+							</select>
+					</div>
+					<div class="boxitem">
+							<a href="#" onclick="popup_add_digitaloutput(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-plus ui-corner-all"><TMPL_VAR "COMMON.BUTTON_ADD"></a>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem" style="width:500px">
+						<!-- Table -->
+						<div id="digitaloutputs-list"></div>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+
+
+<div data-role="popup" id="popup_delete_gpio_module" data-position-to="window" data-transition="flip" data-theme="a" and data-overlay-theme="a" data-dismissible="true" class="ui-content">
+		<h3 class="boxtitle ui-title">
+			<TMPL_VAR GPIOS.LABEL_DELETE_GPIOMODULE>?
+		</h3>
+
+		<div class="box">
+			<div class="boxrow">
+					<div class="boxitem">
+						<TMPL_VAR GPIOS.HINT_DELETE_GPIOMODULE_1> <b><span id="deletemodulename">&nbsp;</span></b> <TMPL_VAR GPIOS.HINT_DELETE_GPIOMODULE_2>	
+					</div>
+			</div>
+			<br>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 90%">
+						<a href="#" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-delete ui-corner-all" data-rel="back"><TMPL_VAR COMMON.BUTTON_CANCEL></a>
+						<a href="#" onclick="delete_gpiomodule(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "COMMON.BUTTON_DELETE"></a>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 90%">
+						<span id="deletegpiomodulehint">&nbsp;</span>
+					</div>
+			</div>
+		</div>
+</div>
+
+<div data-role="popup" id="popup_delete_digital_output" data-position-to="window" data-transition="flip" data-theme="a" and data-overlay-theme="a" data-dismissible="true" class="ui-content">
+		<h3 class="boxtitle ui-title">
+			<TMPL_VAR OUTPUTS.LABEL_DELETE_DIGITALOUTPUT>?
+		</h3>
+
+		<div class="box">
+			<div class="boxrow">
+					<div class="boxitem">
+						<TMPL_VAR OUTPUTS.HINT_DELETE_DIGITALOUTPUT_1> <b><span id="deletedigitaloutputname">&nbsp;</span></b> <TMPL_VAR OUTPUTS.HINT_DELETE_DIGITALOUTPUT_2>	
+					</div>
+			</div>
+			<br>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 90%">
+						<a href="#" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-delete ui-corner-all" data-rel="back"><TMPL_VAR COMMON.BUTTON_CANCEL></a>
+						<a href="#" onclick="delete_digitaloutput(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "COMMON.BUTTON_DELETE"></a>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 90%">
+						<span id="deletedigitaloutputhint">&nbsp;</span>
+					</div>
+			</div>
+		</div>
+</div>
+

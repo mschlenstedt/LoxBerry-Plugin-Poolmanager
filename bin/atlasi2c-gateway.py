@@ -10,6 +10,7 @@ import string
 import paho.mqtt.client as mqtt
 import json
 import logging
+import os
 from datetime import datetime
 import getopt
 import atexit
@@ -28,6 +29,9 @@ device_list = list()
 pconfig = dict()
 sconfig = dict()
 mqttconfig = dict()
+
+lbpconfigdir = os.system("perl -e 'use LoxBerry::System; print $lbpconfigdir; exit;'")
+lbplogdir = os.system("perl -e 'use LoxBerry::System; print $lbplogdir; exit;'")
 
 #############################################################################
 # Atlas Scientific Lib functions
@@ -239,7 +243,7 @@ def remove_non_ascii(string):
 def readconfig():
     device_list.clear()
     try:
-        with open('plugin.json') as f:
+        with open(lbpconfigdir + '/plugin.json') as f:
             global pconfig
             global devices
             pconfig = json.load(f)
@@ -256,7 +260,7 @@ def readconfig():
 
 def readstatusconfig():
     try:
-        with open('status.json') as f:
+        with open(lbpconfigdir + '/status.json') as f:
             global sconfig
             sconfig = json.load(f)
     except:
@@ -432,6 +436,7 @@ def settimestamp(topic):
 
 # Standard loglevel
 loglevel="ERROR"
+logfile=""
 
 # Get full command-line arguments
 # https://stackabuse.com/command-line-arguments-in-python/
@@ -452,13 +457,17 @@ for current_argument, current_value in arguments:
         verbose=1
     elif current_argument in ("-l", "--loglevel"):
         loglevel=current_value
+    elif current_argument in ("-f", "--logfile"):
+        logfile=current_value
 
 # Logging with standard LoxBerry log format
 numeric_loglevel = getattr(logging, loglevel.upper(), None)
 if not isinstance(numeric_loglevel, int):
     raise ValueError('Invalid log level: %s' % loglevel)
 
-logfile=datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')[:-3]+"_acsensors.log"
+if logfile  == "":
+    logfile=lbplogdir + "/"+datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')[:-3]+"_atlasi2c-gateway.log"
+
 log = logging.getLogger()
 fileHandler = logging.FileHandler(logfile)
 formatter = logging.Formatter('%(asctime)s.%(msecs)03d <%(levelname)s> %(message)s',datefmt='%H:%M:%S')
@@ -477,12 +486,17 @@ log.info("Starting Logfile for acsensors.py. The Loglevel is %s" % loglevel.uppe
 log.setLevel(numeric_loglevel)
 
 # Read MQTT config
-try:
-    with open('mqtt.json') as f:
-        mqttconfig = json.load(f)
-except:
-    log.critical("Cannot find mqtt configuration")
-    sys.exit()
+#try:
+#    with open('mqtt.json') as f:
+#        mqttconfig = json.load(f)
+#except:
+#    log.critical("Cannot find mqtt configuration")
+#    sys.exit()
+mqttconfig = dict()
+mqttconfig['server'] = os.system("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokerhost}; exit'")
+mqttconfig['port'] = os.system("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokerport}; exit'")
+mqttconfig['username'] = os.system("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokeruser}; exit'")
+mqttconfig['password'] = os.system("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokerpass}; exit'")
 
 # Read Plugin config
 readconfig()
@@ -551,45 +565,43 @@ while True:
                     log.info("Pause reading from all sensors and set all sensors to sleep.")
                     client.publish(pretopic + "/plugin/pause",1,retain=1)
                     stop = 1
-                    for type in pconfig['sensors']:
-                        if pconfig['sensors'][type]['active']:
-                            sendcmd (pconfig['sensors'][type]['address'],"SLEEP")
-                    response = "Success Plugin: pause"
+                    for item in pconfig['sensors']:
+                        sendcmd (item['address'],"SLEEP")
+                    response = "Success plugin: pause"
                 # Start readings
                 elif command == "start":
                     log.info("Start reading from all sensors.")
                     client.publish(pretopic + "/plugin/pause",0,retain=1)
                     stop = 0
-                    response = "Success Plugin: start"
+                    response = "Success plugin: start"
                 # Read Status
                 elif command == "getstatus":
                     log.info("Reading Status for all sensors.")
                     setnames()
                     getstatus()
-                    response = "Success Plugin: getstatus"
+                    response = "Success plugin: getstatus"
                 # Read Values
                 elif command == "getvalues":
                     log.info("Reading Values from all sensors.")
                     getvalues()
-                    response = "Success Plugin: getvalues"
+                    response = "Success plugin: getvalues"
                 # Read Config
                 elif command == "readconfig":
                     log.info("Re-Reading Config and update status for all sensors.")
                     readconfig()
                     setnames()
                     getstatus()
-                    response = "Success Plugin: readconfig"
+                    response = "Success plugin: readconfig"
                 # Unknown
                 else:
                     log.error("Unknown command: I do not know your given command.")
-                    response = "Error Plugin: Unknown command"
+                    response = "Error plugin: Unknown command"
             # Sensor commands
             elif target.isdigit():
                 log.debug("This is a sensor command: %s." % str(command))
                 found = 0
                 for x in devices:
                     if str(x) == str(target):
-                        print ("Found")
                         found = 1
                         response = sendcmd(target, command)
                 if found is not 1:

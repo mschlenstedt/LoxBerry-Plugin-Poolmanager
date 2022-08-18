@@ -1,0 +1,130 @@
+<div data-role="popup" id="popup_digitalinput_mcp23017" data-position-to="window" data-transition="flip" data-theme="a" and data-overlay-theme="a" data-dismissible="true" class="ui-content">
+	<form id="form_digitalinput_mcp23017">
+		<h3 class="boxtitle ui-title">
+			<span style="vertical-align:middle"><img src="./images/chip_title_32.png"></span>
+			<TMPL_VAR INPUTS.LABEL_TITLE_DIGITALINPUT>: mcp23017
+		</h3>
+
+		<div class="box">
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_MODULENAME>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="gpiomodule_digitalinput_mcp23017" data-mini="true" value="" disabled="disabled">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR COMMON.LABEL_NAME>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="name_digitalinput_mcp23017" data-mini="true" value="" placeholder="<TMPL_VAR COMMON.LABEL_NAME_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_PIN>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<select name="pin_digitalinput_mcp23017" id="pin_digitalinput_mcp23017" data-mini="true">
+							<option value="0">GPA0</option>
+							<option value="1">GPA1</option>
+							<option value="2">GPA2</option>
+							<option value="3">GPA3</option>
+							<option value="4">GPA4</option>
+							<option value="5">GPA5</option>
+							<option value="6">GPA6</option>
+							<option value="7">GPA7</option>
+							<option value="8">GPB0</option>
+							<option value="9">GPB1</option>
+							<option value="10">GPB2</option>
+							<option value="11">GPB3</option>
+							<option value="12">GPB4</option>
+							<option value="13">GPB5</option>
+							<option value="14">GPB6</option>
+							<option value="15">GPB7</option>
+						</select>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_PAYLOAD_ON>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="payload_on_digitalinput_mcp23017" data-mini="true" value="ON">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_PAYLOAD_OFF>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="payload_off_digitalinput_mcp23017" data-mini="true" value="OFF">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="checkbox" name="inverted_digitalinput_mcp23017" id="inverted_digitalinput_mcp23017" data-mini="true">
+						<label for="inverted_digitalinput_mcp23017"><TMPL_VAR INPUTS.LABEL_INVERTED></label>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_RESISTOR>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<select name="resistor_digitalinput_mcp23017" id="resistor_digitalinput_mcp23017" data-mini="true">
+							<option value="none"><TMPL_VAR COMMON.LABEL_NONE></option>
+							<option value="pullup" selected>Pull-Up</option>
+							<option value="pulldown">Pull-Down</option>
+						</select>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_INTERRUPT>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<select name="interrupt_digitalinput_mcp23017" id="interrupt_digitalinput_mcp23017" data-mini="true">
+							<option value="none"><TMPL_VAR COMMON.LABEL_NONE></option>
+							<option value="both" selected><TMPL_VAR INPUTS.LABEL_BOTH></option>
+							<option value="rising"><TMPL_VAR INPUTS.LABEL_RISING></option>
+							<option value="falling"><TMPL_VAR INPUTS.LABEL_FALLING></option>
+						</select>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_POLLINTERVAL>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="pollinterval_digitalinput_mcp23017" data-mini="true" value="1">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR INPUTS.LABEL_BOUNCETIME>	
+					</div>
+					<div class="boxitem" style="width:75%">
+						<input type="text" id="bouncetime_digitalinput_mcp23017" data-mini="true" value="180">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 90%">
+						<input type="hidden" id="edit_digitalinput_mcp23017" value="">
+						<a href="#" onclick="add_digitalinput('mcp23017'); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "COMMON.BUTTON_SAVE"></a>
+						<a href="#" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-delete ui-corner-all" data-rel="back"><TMPL_VAR COMMON.BUTTON_CANCEL></a>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 90%">
+						<span id="savinghint_digitalinput_mcp23017">&nbsp;</span>
+					</div>
+			</div>
+		</div>
+	</form>
+</div>
+
