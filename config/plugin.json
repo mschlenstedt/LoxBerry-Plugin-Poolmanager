@@ -1,7 +1,7 @@
 {
    "actors" : [],
-   "sensors" : [],
    "lcd" : 1,
+   "sensors" : [],
    "statuscycle" : "3600",
    "topic" : "poolmanager",
    "valuecycle" : "5"
