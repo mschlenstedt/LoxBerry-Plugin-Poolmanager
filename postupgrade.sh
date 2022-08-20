@@ -16,5 +16,8 @@ cp -p -v -r /tmp/$ARGV1\_upgrade/config/$ARGV3/* $ARGV5/config/plugins/$ARGV3/
 echo "<INFO> Remove temporary folders"
 rm -r /tmp/$ARGV1\_upgrade
 
+echo "<INFO> Restart Atlas Scientific Service"
+$ARGV5/bin/plugins/$ARGV3/watchdog.pl --action=restart --verbose=0
+
 # Exit with Status 0
 exit 0
