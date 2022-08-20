@@ -32,6 +32,7 @@ sconfig = dict()
 mqttconfig = dict()
 
 lbpconfigdir = os.popen("perl -e 'use LoxBerry::System; print $lbpconfigdir; exit;'").read()
+lbpdatadir = os.popen("perl -e 'use LoxBerry::System; print $lbpdatadir; exit;'").read()
 lbplogdir = os.popen("perl -e 'use LoxBerry::System; print $lbplogdir; exit;'").read()
 
 #############################################################################
@@ -272,7 +273,7 @@ def readconfig():
 
 def readstatusconfig():
     try:
-        with open(lbpconfigdir + '/status.json') as f:
+        with open(lbpdatadir + '/status.json') as f:
             global sconfig
             sconfig = json.load(f)
     except:
