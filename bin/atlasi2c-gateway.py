@@ -122,7 +122,10 @@ def getstatus():
             # Initial values - do not send any data to broker, just configure sensor
             for q in sconfig[dev.moduletype]["initial"].split("++"):
                 log.debug("Sending command %s for sensor %s" % (str(q), str(dev.address)))
-                dev.write(q)
+                try:
+                    dev.write(q)
+                except:
+                    log.error("Could not write to sensor %s." % str(dev.address))
     time.sleep(delaytime)
     # Commands equal for all sensors
     commands = sconfig["all"]
@@ -130,12 +133,19 @@ def getstatus():
     for q in commands:
         for dev in device_list:
             log.debug("Sending command %s for sensor %s" % (str(commands[q]), str(dev.address)))
-            dev.write(commands[q])
+            try:
+                dev.write(commands[q])
+            except:
+                log.error("Could not write to sensor %s." % str(dev.address))
 
         time.sleep(delaytime)
 
         for dev in device_list:
-            response = dev.read().rstrip('\x00').strip()
+            try:
+                response = dev.read().rstrip('\x00').strip()
+            except:
+                log.error("Could not read from sensor %s." % str(dev.address))
+                continue
             values_arr = response.split(": ")[1].split(",")
             origcommand = response.split(": ")[1].split(",")[0]
             #print ("RESPONSE: " )
@@ -190,7 +200,10 @@ def getstatus():
                 sends[dev.address] = 1
                 loop = 1
                 log.debug("Sending command %s for sensor %s" % (str(commandlists[dev.address][i-1]), str(dev.address)))
-                dev.write(commandlists[dev.address][i-1])
+                try:
+                    dev.write(commandlists[dev.address][i-1])
+                except:
+                    log.error("Could not write to sensor %s." % str(dev.address))
             else:
                 sends[dev.address] = 0
                 
@@ -198,7 +211,11 @@ def getstatus():
 
         for dev in device_list:
             if sends[dev.address] == 1:
-                response = dev.read().rstrip('\x00').strip()
+                try:
+                    response = dev.read().rstrip('\x00').strip()
+                except:
+                    log.error("Could not read from sensor %s." % str(dev.address))
+                    continue
                 values_arr = response.split(": ")[1].split(",")
                 origcommand = response.split(": ")[1].split(",")[0]
                 address = response.split(": ")[0].split(" ")[2]
@@ -228,10 +245,17 @@ def getvalues():
     delaytime = device.long_timeout
     for dev in device_list:
         log.debug("Get sensor value for sensor %s" % str(dev.address))
-        dev.write("R")
+        try:
+            dev.write("R")
+        except:
+            log.error("Could not write to sensor %s." % str(dev.address))
     time.sleep(delaytime)
     for dev in device_list:
-        response = dev.read().rstrip('\x00').strip()
+        try:
+            response = dev.read().rstrip('\x00').strip()
+        except:
+            log.error("Could not read from sensor %s." % str(dev.address))
+            continue
         values_arr = response.split(": ")[1].split(",")
         address = response.split(": ")[0].split(" ")[2]
         log.debug("Sensor response: %s" % response)
@@ -249,8 +273,11 @@ def getvalues():
 def setnames():
     for dev in device_list:
         log.info("Set names for all sensors")
-        log.debug("Sending command %s for sensor %s" % (str(dev.name), str(dev.address)))
-        dev.write("name,"+dev.name)
+        log.debug("Sending command name,%s for sensor %s" % (str(dev.name), str(dev.address)))
+        try:
+            dev.write("name,"+dev.name)
+        except:
+            log.error("Could not write to sensor %s." % str(dev.address))
 
 def sendcmd(address, command):
     log.info("Send command %s for sensor %s" % (str(command), str(address)))
@@ -329,7 +356,7 @@ log.addHandler(fileHandler)
 
 # Logging Starting message
 log.setLevel(logging.INFO)
-log.info("Starting Logfile for Atlasi2c Gateway . The Loglevel is %s" % loglevel.upper())
+log.info("Starting Logfile for acsensors.py. The Loglevel is %s" % loglevel.upper())
 log.setLevel(numeric_loglevel)
 
 # Read MQTT config
