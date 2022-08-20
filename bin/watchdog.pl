@@ -108,6 +108,8 @@ exit (0);
 sub start
 {
 
+	unlink ("/dev/shm/poolmanager-watchdog-stop.dat";
+
 	$log->default;
 	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
 	chomp ($count);
@@ -163,6 +165,8 @@ sub start
 
 sub stop
 {
+
+	$response = LoxBerry::System::write_file("/dev/shm/poolmanager-watchdog-stop.dat", "1");
 
 	$log->default;
 	LOGINF "Stopping PoolManager (atlasi2c-gateway)...";

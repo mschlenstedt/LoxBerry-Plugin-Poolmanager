@@ -44,7 +44,7 @@ function servicestatus(update) {
 	});
 }
 
-// SERVICE START_STOP
+// SERVICE RESTART
 
 function servicerestart() {
 
@@ -72,6 +72,37 @@ function servicerestart() {
 	})
 	.always(function( data ) {
 		console.log( "Servicerestart Finished", data );
+	});
+}
+
+// SERVICE STOP
+
+function servicestop() {
+
+	clearInterval(interval);
+	$("#servicestatus").attr("style", "color:blue").html("<TMPL_VAR "COMMON.HINT_EXECUTING">");
+	$("#servicestatusicon").html("<img src='./images/unknown_20.png'>");
+	$.ajax( { 
+			url:  'ajax.cgi',
+			type: 'POST',
+			data: { 
+				action: 'servicestop'
+			}
+		} )
+	.fail(function( data ) {
+		console.log( "Servicestop Fail", data );
+	})
+	.done(function( data ) {
+		console.log( "Servicestop Success", data );
+		if (data == "0") {
+			servicestatus(1);
+		} else {
+			$("#servicestatus").attr("style", "background:#dfdfdf; color:red").html("<TMPL_VAR "COMMON.HINT_FAILED">");
+		}
+		interval = window.setInterval(function(){ servicestatus(); }, 5000);
+	})
+	.always(function( data ) {
+		console.log( "Servicestop Finished", data );
 	});
 }
 

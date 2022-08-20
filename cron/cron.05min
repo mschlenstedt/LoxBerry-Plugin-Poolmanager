@@ -1,2 +1,5 @@
 #!/bin/bash
+if test -f "/dev/shm/poolmanager-watchdog-stop.dat"; then
+	exit
+fi
 REPLACELBPBINDIR/watchdog.pl --action=check --verbose=0
