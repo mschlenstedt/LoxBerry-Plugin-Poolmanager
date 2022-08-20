@@ -108,7 +108,7 @@ exit (0);
 sub start
 {
 
-	unlink ("/dev/shm/poolmanager-watchdog-stop.dat";
+	unlink ("/dev/shm/poolmanager-watchdog-stop.dat");
 
 	$log->default;
 	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;

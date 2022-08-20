@@ -91,14 +91,11 @@ function servicestop() {
 		} )
 	.fail(function( data ) {
 		console.log( "Servicestop Fail", data );
+		$("#servicestatus").attr("style", "background:#dfdfdf; color:red").html("<TMPL_VAR "COMMON.HINT_FAILED">");
 	})
 	.done(function( data ) {
 		console.log( "Servicestop Success", data );
-		if (data == "0") {
-			servicestatus(1);
-		} else {
-			$("#servicestatus").attr("style", "background:#dfdfdf; color:red").html("<TMPL_VAR "COMMON.HINT_FAILED">");
-		}
+		servicestatus(1);
 		interval = window.setInterval(function(){ servicestatus(); }, 5000);
 	})
 	.always(function( data ) {
