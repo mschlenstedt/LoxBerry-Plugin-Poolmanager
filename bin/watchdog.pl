@@ -40,7 +40,7 @@ my %L = LoxBerry::System::readlanguage("language.ini");
 LOGSTART "Starting Watchdog";
 
 # Lock
-my $status = LoxBerry::System::lock(lockfile => 'poolmanager-watchdog', wait => 120);
+my $status = LoxBerry::System::lock(lockfile => 'poolmanager-watchdog', wait => 10);
 if ($status) {
 	LOGCRIT "$status currently running - Quitting.";
 	exit (1);
