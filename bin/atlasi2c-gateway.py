@@ -329,7 +329,7 @@ log.addHandler(fileHandler)
 
 # Logging Starting message
 log.setLevel(logging.INFO)
-log.info("Starting Logfile for acsensors.py. The Loglevel is %s" % loglevel.upper())
+log.info("Starting Logfile for Atlasi2c Gateway . The Loglevel is %s" % loglevel.upper())
 log.setLevel(numeric_loglevel)
 
 # Read MQTT config
