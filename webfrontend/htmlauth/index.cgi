@@ -50,8 +50,6 @@ my $templateout;
 # Language Phrases
 my %L;
 
-# Globals 
-
 ##########################################################################
 # AJAX
 ##########################################################################
@@ -75,22 +73,32 @@ if( $q->{ajax} ) {
 	require LoxBerry::Web;
 	
 	# Default is gpio_settings form
-	$q->{form} = "gpios" if !$q->{form};
+	$q->{form} = "atlas" if !$q->{form};
 
-	if ($q->{form} eq "sensors") {
-		my $templatefile = "$lbptemplatedir/sensor_settings.html";
+	if ($q->{form} eq "calibration") {
+		my $templatefile = "$lbptemplatedir/calibration_settings.html";
 		$template = LoxBerry::System::read_file($templatefile);
-		&form_sensors();
+		&form_calibration();
 	}
 	elsif ($q->{form} eq "logs") {
 		my $templatefile = "$lbptemplatedir/log_settings.html";
 		$template = LoxBerry::System::read_file($templatefile);
 		&form_logs();
 	}
-	else {
-		my $templatefile = "$lbptemplatedir/gpio_settings.html";
+	elsif ($q->{form} eq "lcd") {
+		my $templatefile = "$lbptemplatedir/lcd_settings.html";
 		$template = LoxBerry::System::read_file($templatefile);
-		&form_gpios();
+		&form_lcd();
+	}
+	elsif ($q->{form} eq "settings") {
+		my $templatefile = "$lbptemplatedir/general_settings.html";
+		$template = LoxBerry::System::read_file($templatefile);
+		&form_settings();
+	}
+	else {
+		my $templatefile = "$lbptemplatedir/atlas_settings.html";
+		$template = LoxBerry::System::read_file($templatefile);
+		&form_atlas();
        	}
 	
 }
@@ -101,64 +109,52 @@ if( $q->{ajax} ) {
 exit;
 
 ##########################################################################
-# Form: GPIO Settings
+# Form: Atlas
 ##########################################################################
 
-sub form_gpios
+sub form_atlas
 {
-	# Read GPIO Modules templates
-	opendir(my $fh,"$lbptemplatedir/gpiomodules");
-	my @files = readdir($fh);
-	close $fh;
-
-	my $options;
-	foreach (@files) {
-		if ( $_ =~ /.*\.html/ ) {
-			$template = $template .= LoxBerry::System::read_file("$lbptemplatedir/gpiomodules/$_");
-			$_ =~ s/\.html//g;
-			$options .= "<option value='$_'>$_</option>";
-		}
-	}
-	
-	# Read DIGITALOUTPUT templates
-	opendir(my $fh,"$lbptemplatedir/digitaloutputs");
-	my @files = readdir($fh);
-	close $fh;
-
-	foreach (@files) {
-		if ( $_ =~ /.*\.html/ ) {
-			$template = $template .= LoxBerry::System::read_file("$lbptemplatedir/digitaloutputs/$_");
-			$_ =~ s/\.html//g;
-		}
-	}
-	
-	# Read DIGITALINPUT templates
-	opendir(my $fh,"$lbptemplatedir/digitalinputs");
-	my @files = readdir($fh);
-	close $fh;
-
-	foreach (@files) {
-		if ( $_ =~ /.*\.html/ ) {
-			$template = $template .= LoxBerry::System::read_file("$lbptemplatedir/digitalinputs/$_");
-			$_ =~ s/\.html//g;
-		}
-	}
-
 	# Prepare template
 	&preparetemplate();
-
-	# Template Variables
-	$templateout->param("GPIO_MODULE_OPTIONS", $options);
 
 	return();
 }
 
 ##########################################################################
-# Form: Sensors
+# Form: Calibration
 ##########################################################################
 
-sub form_sensors
+sub form_calibration
 {
+	# Prepare template
+	&preparetemplate();
+
+	return();
+}
+
+
+##########################################################################
+# Form: LCD
+##########################################################################
+
+sub form_lcd
+{
+	# Prepare template
+	&preparetemplate();
+
+	return();
+}
+
+
+##########################################################################
+# Form: Settings
+##########################################################################
+
+sub form_settings
+{
+	# Prepare template
+	&preparetemplate();
+
 	return();
 }
 
@@ -169,7 +165,12 @@ sub form_sensors
 
 sub form_logs
 {
-	$template->param("LOGLIST", LoxBerry::Web::loglist_html());
+
+	# Prepare template
+	&preparetemplate();
+
+	$templateout->param("LOGLIST", LoxBerry::Web::loglist_html());
+
 	return();
 }
 
@@ -197,13 +198,21 @@ sub preparetemplate
 	# Navbar
 	our %navbar;
 
-	$navbar{10}{Name} = "$L{'COMMON.LABEL_GPIOS'}";
-	$navbar{10}{URL} = 'index.cgi?form=gpios';
-	$navbar{10}{active} = 1 if $q->{form} eq "gpios";
+	$navbar{10}{Name} = "$L{'COMMON.LABEL_ATLAS'}";
+	$navbar{10}{URL} = 'index.cgi?form=atlas';
+	$navbar{10}{active} = 1 if $q->{form} eq "atlas";
 	
-	$navbar{20}{Name} = "$L{'COMMON.LABEL_SENSORS'}";
-	$navbar{20}{URL} = 'index.cgi?form=sensors';
-	$navbar{20}{active} = 1 if $q->{form} eq "sensors";
+	$navbar{20}{Name} = "$L{'COMMON.LABEL_CALIBRATION'}";
+	$navbar{20}{URL} = 'index.cgi?form=calibration';
+	$navbar{20}{active} = 1 if $q->{form} eq "calibration";
+
+	$navbar{30}{Name} = "$L{'COMMON.LABEL_LCD'}";
+	$navbar{30}{URL} = 'index.cgi?form=lcd';
+	$navbar{30}{active} = 1 if $q->{form} eq "lcd";
+	
+	$navbar{40}{Name} = "$L{'COMMON.LABEL_SETTINGS'}";
+	$navbar{40}{URL} = 'index.cgi?form=settings';
+	$navbar{40}{active} = 1 if $q->{form} eq "settings";
 	
 	$navbar{98}{Name} = "$L{'COMMON.LABEL_LOGS'}";
 	$navbar{98}{URL} = 'index.cgi?form=logs';
@@ -216,7 +225,9 @@ sub printtemplate
 {
 
 	# Print out Template
-	LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "https://www.loxwiki.eu/x/3gmcAw", "");
+	LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "https://loxwiki.atlassian.net/wiki/spaces/LOXBERRY/pages/1254687237/LoxPoolManager", "");
+	# Print your plugins notifications with name daemon.
+	print LoxBerry::Log::get_notifications_html($lbpplugindir, 'PoolManager');
 	print $templateout->output();
 	LoxBerry::Web::lbfooter();
 	

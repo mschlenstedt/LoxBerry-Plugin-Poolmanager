@@ -34,6 +34,9 @@ if ($verbose) {
         $log->loglevel(7);
 }
 
+# Language File
+my %L = LoxBerry::System::readlanguage("language.ini");
+
 LOGSTART "Starting Watchdog";
 
 # Lock
@@ -41,6 +44,22 @@ my $status = LoxBerry::System::lock(lockfile => 'poolmanager-watchdog', wait => 
 if ($status) {
 	LOGCRIT "$status currently running - Quitting.";
 	exit (1);
+}
+
+# Creating tmp file with failed checks
+my $response;
+if (!-e "/dev/shm/poolmanager-watchdog-fails.dat") {
+	$response = LoxBerry::System::write_file("/dev/shm/poolmanager-watchdog-fails.dat", "0");
+}
+
+# Check for installed MQTT Plugin
+$mqtt = LoxBerry::IO::mqtt_connectiondetails();
+if ( !defined(mqtt) ) {
+	my $fails = LoxBerry::System::read_file("/dev/shm/poolmanager-watchdog-fails.dat");
+	if ($fails < 9) {
+		notify ( $lbpplugindir, "PoolManager", $L{'COMMON.ERROR_MQTTGATEWAY'}, 1);
+		my $response = LoxBerry::System::write_file("/dev/shm/poolmanager-watchdog-fails.dat", "10");
+	}
 }
 
 # Todo
@@ -90,7 +109,7 @@ sub start
 {
 
 	$log->default;
-	my $count = `pgrep -c -f "python3 atlasi2c-gateway.py"`;
+	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
 	chomp ($count);
 	$count--; # Perl itself runs pgrep with sh, which also match -f in pgrep
 	if ($count > "0") {
@@ -108,7 +127,7 @@ sub start
 		$poolmanagerlog->loglevel(7);
 	}
 	my $logfile = $poolmanagerlog->filename();
-	
+
 	# Loglevel
 	my $loglevel = "INFO";
 	$loglevel = "CRITICAL" if ($log->loglevel() <= 2);
@@ -120,10 +139,12 @@ sub start
 
 	$poolmanagerlog->default;
 	LOGSTART "Starting PoolManager (atlasi2c-gateway)...";
-	system ("python3 atlasi2c-gateway.py --logfile=$logfile --loglevel=$loglevel >> $logfile 2>&1 &");
+	my $dbkey = $poolmanagerlog->dbkey;
+	system ("python3 $lbpbindir/atlasi2c-gateway.py --logfile=$logfile --loglevel=$loglevel --logdbkey=$dbkey >> $logfile 2>&1 &");
+	#system ("python3 $lbpbindir/atlasi2c-gateway.py --logfile=$logfile --loglevel=$loglevel --logdbkey=$dbkey --verbose >> /tmp/templogfile.log 2>&1 &");
 	sleep 2;
 
-	my $count = `pgrep -c -f "python3 atlasi2c-gateway.py"`;
+	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
 	chomp ($count);
 	$count--; # Perl itself runs pgrep with sh, which also match -f in pgrep
 	$log->default;
@@ -131,7 +152,7 @@ sub start
 		LOGCRIT "Could not start PoolManager. Error: $?";
 		exit (1)
 	} else {
-		my $status = `pgrep -o -f "python3 atlasi2c-gateway.py`;
+		my $status = `pgrep -o -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
 		chomp ($status);
 		LOGOK "PoolManager started successfully. Running PID: $status";
 	}
@@ -145,16 +166,16 @@ sub stop
 
 	$log->default;
 	LOGINF "Stopping PoolManager (atlasi2c-gateway)...";
-	system ('pkill -f "python3 atlasi2c-gateway.py" > /dev/null 2>&1');
+	system ("pkill -f 'python3 $lbpbindir/atlasi2c-gateway.py' > /dev/null 2>&1");
 	sleep 2;
 
-	my $count = `pgrep -c -f "python3 atlasi2c-gateway.py"`;
+	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
 	chomp ($count);
 	$count--; # Perl `` itself runs pgrep with sh, which also match -f in pgrep
 	if ($count eq "0") {
 		LOGOK "PoolManager stopped successfully.";
 	} else {
-		my $status = `pgrep -o -f "python3 atlasi2c-gateway.py"`;
+		my $status = `pgrep -o -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
 		chomp ($status);
 		LOGCRIT "Could not stop PoolManager. Running PID: $status";
 		exit (1)
@@ -183,12 +204,7 @@ sub check
 	$log->default;
 	LOGINF "Checking Status of PoolManager...";
 	
-	# Creating tmp file with failed checks
-	if (!-e "/dev/shm/poolmanager-watchdog-fails.dat") {
-		my $response = LoxBerry::System::write_file("/dev/shm/poolmanager-watchdog-fails.dat", "0");
-	}
-
-	my $count = `pgrep -c -f "python3 atlasi2c-gateway.py"`;
+	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
 	chomp ($count);
 	$count--; # Perl `` itself runs pgrep with sh, which also match -f in pgrep
 	if ($count eq "0") {
@@ -203,7 +219,7 @@ sub check
 			&restart();
 		}
 	} else {
-		my $status = `pgrep -o -f "python3 atlasi2c-gateway.py"`;
+		my $status = `pgrep -o -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
 		chomp ($status);
 		LOGOK "PoolManager is running. Fine. Running PID: $status";
 		my $response = LoxBerry::System::write_file("/dev/shm/poolmanager-watchdog-fails.dat", "0");

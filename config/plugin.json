@@ -1,58 +1,8 @@
 {
+   "actors" : [],
+   "sensors" : [],
    "lcd" : 1,
+   "statuscycle" : "3600",
    "topic" : "poolmanager",
-   "statuscycle" : 3600,
-   "valuecycle" : 5,
-   "sensors" : [
-	   {
-		   "name": "pH Sonde",
-		   "type": "pH",
-		   "address": 99,
-		   "lcd": "1",
-		   "lcd_unit": "",
-		   "lcd_value": "value1",
-		   "calibrate": 1,
-		   "cal_mid": "7.0",
-		   "cal_low": "4.0",
-		   "cal_high": "10.0"
-	   },
-	   {
-		   "name": "Redox Sonde",
-		   "type": "ORP",
-		   "address": 98,
-		   "lcd": "1",
-		   "lcd_unit": "mV",
-		   "lcd_value": "value1",
-		   "calibrate": 1,
-		   "cal_mid": "225",
-		   "cal_low": "",
-		   "cal_high": ""
-	   }
-   ], 
-   "actors" : [
-	   {
-		   "name": "pH_Minus",
-		   "type": "PMP",
-		   "address": 103,
-		   "lcd": "0",
-		   "lcd_unit": "ml",
-		   "lcd_value": "value1",
-		   "calibrate": 1,
-		   "cal_mid": "10",
-		   "cal_low": "",
-		   "cal_high": ""
-	   },
-	   {
-		   "name": "Chlor",
-		   "type": "PMP",
-		   "address": 104,
-		   "lcd": "0",
-		   "lcd_unit": "ml",
-		   "lcd_value": "value1",
-		   "calibrate": 1,
-		   "cal_mid": "10",
-		   "cal_low": "",
-		   "cal_high": ""
-	   }
-   ]
+   "valuecycle" : "5"
 }

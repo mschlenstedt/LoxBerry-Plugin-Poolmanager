@@ -13,7 +13,8 @@ import logging
 import os
 from datetime import datetime
 import getopt
-import atexit
+#import atexit
+import signal
 #from Queue import Queue
 from queue import Queue
 
@@ -30,8 +31,8 @@ pconfig = dict()
 sconfig = dict()
 mqttconfig = dict()
 
-lbpconfigdir = os.system("perl -e 'use LoxBerry::System; print $lbpconfigdir; exit;'")
-lbplogdir = os.system("perl -e 'use LoxBerry::System; print $lbplogdir; exit;'")
+lbpconfigdir = os.popen("perl -e 'use LoxBerry::System; print $lbpconfigdir; exit;'").read()
+lbplogdir = os.popen("perl -e 'use LoxBerry::System; print $lbplogdir; exit;'").read()
 
 #############################################################################
 # Atlas Scientific Lib functions
@@ -42,7 +43,7 @@ class AtlasI2C:
     # the timeout needed to query readings and calibrations
     LONG_TIMEOUT = 1.5
     # timeout for regular commands
-    SHORT_TIMEOUT = .3
+    SHORT_TIMEOUT = 0.5
     # the default bus for I2C on the newer Raspberry Pis, 
     # certain older boards use bus 0
     DEFAULT_BUS = 1
@@ -163,13 +164,11 @@ class AtlasI2C:
         
         raw_data = self.file_read.read(num_of_bytes)
         response = self.get_response(raw_data=raw_data)
-        #print(response)
         is_valid, error_code = self.response_valid(response=response)
 
         if is_valid:
             char_list = self.handle_raspi_glitch(response[1:])
             result = "Success " + self.get_device_info() + ": " +  str(''.join(char_list))
-            #result = "Success: " +  str(''.join(char_list))
         else:
             result = "Error " + self.get_device_info() + ": " + error_code
 
@@ -247,13 +246,26 @@ def readconfig():
             global pconfig
             global devices
             pconfig = json.load(f)
+
+        # Set default values
+        if int(pconfig['statuscycle']) < 1.5:
+            log.warning("Status Cycle is smaller than 1.5 seconds or not defined. Setting it to 300 seconds.")
+            pconfig['statuscycle'] = 300
+        if int(pconfig['valuecycle']) < 1.5:
+            log.warning("Values Cycle is smaller than 1.5 seconds or not defined. Setting it to 5 seconds.")
+            pconfig['statuscycle'] = 5
+        if str(pconfig['topic']) == "":
+            log.warning("MQTT Topic is not set. Set it to default topic 'poolmanager'.")
+            pconfig['topic'] = "poolmanager"
+
+        # Parse snesors and actors
         for item in pconfig['sensors']:
             devices[item["address"]] = item
         for item in pconfig['actors']:
             devices[item["address"]] = item
         for i in devices:
             nameascii = remove_non_ascii(devices[i]["name"].replace(" ", ""))
-            device_list.append(AtlasI2C(address = i, moduletype = devices[i]["type"], name = nameascii[:16]))
+            device_list.append(AtlasI2C(address = int(i), moduletype = devices[i]["type"], name = nameascii[:16]))
     except:
         log.critical("Cannot read plugin configuration")
         sys.exit()
@@ -267,10 +279,19 @@ def readstatusconfig():
         log.critical("Cannot read status configuration")
         sys.exit()
 
-def exit_handler():
+def exit_handler(a="", b=""):
+    # Close MQTT
     client.loop_stop()
     log.info("MQTT: Disconnecting from Broker.")
     client.disconnect()
+    # close the log
+    if str(logdbkey) != "":
+        logging.shutdown()
+        os.system("perl -e 'use LoxBerry::Log; my $log = LoxBerry::Log->new ( dbkey => \"" + logdbkey + "\", append => 1 ); LOGEND \"Good Bye.\"; $log->close; exit;'")
+    else:
+        log.info("Good Bye.")
+    # End
+    sys.exit();
 
 def getstatus():
     log.info("Updating status for all sensors and actors")
@@ -298,6 +319,10 @@ def getstatus():
             response = dev.read().rstrip('\x00').strip()
             values_arr = response.split(": ")[1].split(",")
             origcommand = response.split(": ")[1].split(",")[0]
+            #print ("RESPONSE: " )
+            #print (response.encode('utf-8'))
+            #print ("ORIGNINAL COMMAND: ")
+            #print (origcommand.encode('utf-8'))
             address = response.split(": ")[0].split(" ")[2]
             log.debug("Sensor response: %s" % response)
             if response.startswith("Success"):
@@ -437,13 +462,14 @@ def settimestamp(topic):
 # Standard loglevel
 loglevel="ERROR"
 logfile=""
+logdbkey=""
 
 # Get full command-line arguments
 # https://stackabuse.com/command-line-arguments-in-python/
 full_cmd_arguments = sys.argv
 argument_list = full_cmd_arguments[1:]
-short_options = "vl:"
-long_options = ["verbose","loglevel="]
+short_options = "vlfd:"
+long_options = ["verbose","loglevel=","logfile=","logdbkey="]
 
 try:
     arguments, values = getopt.getopt(argument_list, short_options, long_options)
@@ -459,14 +485,16 @@ for current_argument, current_value in arguments:
         loglevel=current_value
     elif current_argument in ("-f", "--logfile"):
         logfile=current_value
+    elif current_argument in ("-d", "--logdbkey"):
+        logdbkey=current_value
 
 # Logging with standard LoxBerry log format
 numeric_loglevel = getattr(logging, loglevel.upper(), None)
 if not isinstance(numeric_loglevel, int):
     raise ValueError('Invalid log level: %s' % loglevel)
 
-if logfile  == "":
-    logfile=lbplogdir + "/"+datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')[:-3]+"_atlasi2c-gateway.log"
+if str(logfile) == "":
+    logfile = str(lbplogdir) + "/" + datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')[:-3] + "_atlasi2c-gateway.log"
 
 log = logging.getLogger()
 fileHandler = logging.FileHandler(logfile)
@@ -486,17 +514,15 @@ log.info("Starting Logfile for acsensors.py. The Loglevel is %s" % loglevel.uppe
 log.setLevel(numeric_loglevel)
 
 # Read MQTT config
-#try:
-#    with open('mqtt.json') as f:
-#        mqttconfig = json.load(f)
-#except:
-#    log.critical("Cannot find mqtt configuration")
-#    sys.exit()
 mqttconfig = dict()
-mqttconfig['server'] = os.system("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokerhost}; exit'")
-mqttconfig['port'] = os.system("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokerport}; exit'")
-mqttconfig['username'] = os.system("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokeruser}; exit'")
-mqttconfig['password'] = os.system("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokerpass}; exit'")
+mqttconfig['server'] = os.popen("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokerhost}; exit'").read()
+mqttconfig['port'] = os.popen("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokerport}; exit'").read()
+mqttconfig['username'] = os.popen("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokeruser}; exit'").read()
+mqttconfig['password'] = os.popen("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokerpass}; exit'").read()
+
+if mqttconfig['server'] == "" or mqttconfig['port'] == "":
+    log.critical("Cannot find mqtt configuration")
+    sys.exit()
 
 # Read Plugin config
 readconfig()
@@ -513,8 +539,10 @@ if mqttconfig['username'] and mqttconfig['password']:
 
 log.info("Connecting to Broker %s on port %s." % (mqttconfig['server'], str(mqttconfig['port'])))
 client.connect(mqttconfig['server'], port = int(mqttconfig['port']))
+
+# Main Topic
 pretopic = pconfig['topic']
-mqttpause = 0
+mqttpause = 0 # Just in Case we need a slow down...
 
 # Subscribe to the set/comand topic
 stopic = pretopic + "/set/command"
@@ -539,7 +567,9 @@ device = AtlasI2C()
 client.publish(pretopic + "/plugin/pause",0,retain=1)
 
 # Exit handler
-atexit.register(exit_handler)
+#atexit.register(exit_handler)
+signal.signal(signal.SIGTERM, exit_handler)
+signal.signal(signal.SIGINT, exit_handler)
 
 # Loop
 while True:

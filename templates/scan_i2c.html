@@ -1,8 +1,50 @@
-<TMPL_VAR NAME=GPIOS.LABEL_SCANI2CLIST> <b><TMPL_VAR NAME=BUSLIST> </b>
+<TMPL_VAR NAME=ATLAS.LABEL_SCANI2CLIST> <b><TMPL_VAR NAME=BUSLIST> </b>
 <br><br>
-
+<font size="-1"><TMPL_VAR NAME=ATLAS.HINT_I2CBUS_1></font>
+<br><br>
+<font size="-1">
+<TMPL_VAR NAME=ATLAS.HINT_I2CBUS_2>
+<table width="50%" border=0>
+	<tr>
+		<td><b>Type</b></td>
+		<td><b>Decimal</b></td>
+		<td><b>Hexadecimal</b></td>
+	</tr>
+	<tr>
+		<td>ORP</td>
+		<td>98</td>
+		<td>0x62</td>
+	</tr>
+	<tr>
+		<td>PH</td>
+		<td>99</td>
+		<td>0x63</td>
+	</tr>
+	<tr>
+		<td>RTD</td>
+		<td>102</td>
+		<td>0x66</td>
+	</tr>
+	<tr>
+		<td>PMP</td>
+		<td>103</td>
+		<td>0x67</td>
+	</tr>
+	<tr>
+		<td>FLO</td>
+		<td>104</td>
+		<td>0x68</td>
+	</tr>
+	<tr>
+		<td>PRS</td>
+		<td>106</td>
+		<td>0x6a</td>
+	</tr>
+</table>
+</font>
+<br>
 <TMPL_LOOP NAME=BUSSCANS>
-<h3><TMPL_VAR NAME=GPIOS.LABEL_SCANI2C> <TMPL_VAR NAME=BUS></h3>
+<h3><TMPL_VAR NAME=ATLAS.LABEL_SCANI2C> <TMPL_VAR NAME=BUS></h3>
 <pre>
 <TMPL_VAR NAME=OUTPUT>
 </pre>
