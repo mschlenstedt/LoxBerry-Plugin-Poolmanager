@@ -332,7 +332,7 @@ def getstatus():
                         command = q
                         found = 1
                         break
-                if found is not 1:
+                if found != 1:
                     log.error ("Could not find original command in status.json (%s)" % str(origcommand))
                     continue
                 if len(values_arr)-1 is not len(command.split("++")):
@@ -392,7 +392,7 @@ def getstatus():
                             command = q
                             found = 1
                             break
-                    if found is not 1:
+                    if found != 1:
                         log.error ("Could not find original command in status.json (%s)" % str(origcommand))
                         continue
                     if len(values_arr)-1 is not len(command.split("++")):
@@ -634,7 +634,7 @@ while True:
                     if str(x) == str(target):
                         found = 1
                         response = sendcmd(target, command)
-                if found is not 1:
+                if found != 1:
                     log.error("Unknown target %s: The sensor address is not known or not active." % str(target))
                     response = "Error " + str(target) + " Unknown target: The sensor address is not known or not active."
             # Unknown target
