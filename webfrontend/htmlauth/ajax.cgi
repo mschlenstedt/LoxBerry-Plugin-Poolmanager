@@ -23,12 +23,16 @@ my $q = $cgi->Vars;
 #LOGSTART "Request $q->{action}";
 
 if( $q->{action} eq "servicerestart" ) {
-	system ("$lbpbindir/watchdog.pl --action=restart --verbose=0 > /dev/null 2>&1");
-	$response = $?;
+	# We have to start in background mode because watchdog uses fork
+	system ("$lbpbindir/watchdog.pl --action=restart --verbose=0 > /dev/null 2>&1 &");
+	my $resp = $?;
+	sleep(1);
+	my $status = LoxBerry::System::lock(lockfile => 'poolmanager-watchdog', wait => 600); # Wait until watchdog is ready...
+	$response = $resp;
 }
 
 if( $q->{action} eq "servicestop" ) {
-	system ("$lbpbindir/watchdog.pl --action=stop --verbose=0 > /dev/null 2>&1");
+	system ("$lbpbindir/watchdog.pl --action=stop --verbose=1 > /dev/null 2>&1");
 	$response = $?;
 }
 

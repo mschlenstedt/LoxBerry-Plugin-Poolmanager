@@ -142,8 +142,15 @@ sub start
 	$poolmanagerlog->default;
 	LOGSTART "Starting PoolManager (atlasi2c-gateway)...";
 	my $dbkey = $poolmanagerlog->dbkey;
-	system ("python3 $lbpbindir/atlasi2c-gateway.py --logfile=$logfile --loglevel=$loglevel --logdbkey=$dbkey >> $logfile 2>&1 &");
-	#system ("python3 $lbpbindir/atlasi2c-gateway.py --logfile=$logfile --loglevel=$loglevel --logdbkey=$dbkey --verbose >> /tmp/templogfile.log 2>&1 &");
+	#system ("python3 $lbpbindir/atlasi2c-gateway.py --logfile=$logfile --loglevel=$loglevel --logdbkey=$dbkey &");
+	#system("python3", "$lbpbindir/atlasi2c-gateway.py", "--logfile=$logfile", "--loglevel=$loglevel", "--logdbkey=$dbkey", "--verbose", ">>", "/tmp/templogfile.log", "2>&1", "&");
+	# With system and background process (&) we often get i2c failures with the PMP. Is this really true?! I don't know.... But with fork() it seems to be better....
+	my $child_pid = fork();
+	die "Couldn't fork" unless defined $child_pid;
+	if (! $child_pid) {
+		exec "python3", "$lbpbindir/atlasi2c-gateway.py", "--logfile=$logfile", "--loglevel=$loglevel", "--logdbkey=$dbkey";
+		die "Couldn't exec myprogram: $!";
+	}
 	sleep 2;
 
 	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
