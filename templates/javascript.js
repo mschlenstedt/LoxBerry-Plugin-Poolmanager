@@ -2,7 +2,12 @@
 
 $(function() {
 	
-	interval = window.setInterval(function(){ servicestatus(); }, 5000);
+	if (document.getElementById("servicestatus")) {
+		interval = window.setInterval(function(){ servicestatus(); }, 5000);
+	}
+	if (document.getElementById("calibration_overview")) {
+		intervalm = window.setInterval(function(){ measurements(); }, 1000);
+	}
 	servicestatus();
 	getconfig();
 
@@ -103,6 +108,28 @@ function servicestop() {
 	})
 	.always(function( data ) {
 		console.log( "Servicestop Finished", data );
+	});
+}
+
+function measurements() {
+
+	$.ajax( { 
+			url:  'measurements.json',
+			type: 'GET'
+		} )
+	.fail(function( data ) {
+		console.log( "Measurements Fail", data );
+	})
+	.done(function( data ) {
+		console.log( "Measurements Success", data );
+		for (var key in data) {
+			if (document.getElementById('value'+key)) {
+				document.getElementById('value'+key).innerHTML = data[key]['value1']
+			}
+		}
+	})
+	.always(function( data ) {
+		console.log( "Measurements Finished", data );
 	});
 }
 
@@ -536,6 +563,7 @@ function getconfig() {
 			var tbody = $('<tbody />').appendTo(table);
 			// Add the data rows to the table body.
 			$.each( sensors, function( intDevId, item){
+				// Table for Atlas Form
 				var row = $('<tr />').appendTo(tbody);
 				$('<td style="text-align:left;">'+item.name+'<\/td>').appendTo(row);
 				$('<td style="text-align:left;">'+item.type+'<\/td>').appendTo(row);
@@ -550,6 +578,10 @@ function getconfig() {
                                 <img src="./images/cancel_20.png" height="20"></img></a> \
                                 ' }).appendTo(row);
                                 $(row).trigger("create");
+				// Box for Calibration Form
+				if (document.getElementById("calibration_overview")) {
+				        calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'><img src='./images/input_title_32.png'></span>&nbsp;"+item.name+"</h2><div class='box'><div class='boxrow'><div class='boxitem'><span class='large bold' id='value"+item.address+"'></span>&nbsp;<span class='tiny'>"+item.lcd_unit+"</span></div></div></div></div>"
+				}
 			});
 		};
 
@@ -575,6 +607,7 @@ function getconfig() {
 			var tbody = $('<tbody />').appendTo(table);
 			// Add the data rows to the table body.
 			$.each( actors, function( intDevId, item){
+				// Table for Atlas Form
 				var row = $('<tr />').appendTo(tbody);
 				$('<td style="text-align:left;">'+item.name+'<\/td>').appendTo(row);
 				$('<td style="text-align:left;">'+item.type+'<\/td>').appendTo(row);
@@ -589,12 +622,19 @@ function getconfig() {
                                 <img src="./images/cancel_20.png" height="20"></img></a> \
                                 ' }).appendTo(row);
                                 $(row).trigger("create");
+				// Box for Calibration Form
+				if (document.getElementById("calibration_overview")) {
+			        	calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'><img src='./images/output_title_32.png'></span>&nbsp;"+item.name+"</h2><div class='box'><div class='boxrow'><div class='boxitem'><span class='large bold' id='value"+item.address+"'></span>&nbsp;<span class='tiny''>"+item.lcd_unit+"</span></div></div></div></div>"
+				}
 			});
 		};
 
 	})
 	.always(function( data ) {
 		console.log( "getconfig Finished" );
+		if (document.getElementById("calibration_overview")) {
+			measurements();
+		}
 	})
 
 }
