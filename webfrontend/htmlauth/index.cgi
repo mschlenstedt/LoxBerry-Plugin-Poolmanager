@@ -72,6 +72,9 @@ if( $q->{ajax} ) {
 	
 	require LoxBerry::Web;
 	
+	# Create symbolic link to measurements
+	my $res = qx (ln -s /dev/shm/poolmanager-measurements.json $lbphtmlauthdir/measurements.json);
+
 	# Default is gpio_settings form
 	$q->{form} = "atlas" if !$q->{form};
 
