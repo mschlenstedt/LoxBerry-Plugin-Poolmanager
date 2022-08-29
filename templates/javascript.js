@@ -628,6 +628,9 @@ function getconfig() {
 				}
 			});
 		};
+		if (document.getElementById('calibration_overview') && typeof sensors === 'undefined' && typeof actors === 'undefined')  {
+		       	calibration_overview.innerHTML = "<center><b><TMPL_VAR ATLAS.HINT_NO_DEVICES></b></center>"
+		}
 
 	})
 	.always(function( data ) {
