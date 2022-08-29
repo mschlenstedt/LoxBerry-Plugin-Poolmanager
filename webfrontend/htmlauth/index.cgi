@@ -76,22 +76,17 @@ if( $q->{ajax} ) {
 	my $res = qx (ln -s /dev/shm/poolmanager-measurements.json $lbphtmlauthdir/measurements.json);
 
 	# Default is gpio_settings form
-	$q->{form} = "atlas" if !$q->{form};
+	$q->{form} = "measurements" if !$q->{form};
 
-	if ($q->{form} eq "calibration") {
-		my $templatefile = "$lbptemplatedir/calibration_settings.html";
+	if ($q->{form} eq "atlas") {
+		my $templatefile = "$lbptemplatedir/atlas_settings.html";
 		$template = LoxBerry::System::read_file($templatefile);
-		&form_calibration();
+		&form_atlas();
 	}
 	elsif ($q->{form} eq "logs") {
 		my $templatefile = "$lbptemplatedir/log_settings.html";
 		$template = LoxBerry::System::read_file($templatefile);
 		&form_logs();
-	}
-	elsif ($q->{form} eq "lcd") {
-		my $templatefile = "$lbptemplatedir/lcd_settings.html";
-		$template = LoxBerry::System::read_file($templatefile);
-		&form_lcd();
 	}
 	elsif ($q->{form} eq "settings") {
 		my $templatefile = "$lbptemplatedir/general_settings.html";
@@ -99,9 +94,9 @@ if( $q->{ajax} ) {
 		&form_settings();
 	}
 	else {
-		my $templatefile = "$lbptemplatedir/atlas_settings.html";
+		my $templatefile = "$lbptemplatedir/measurements_settings.html";
 		$template = LoxBerry::System::read_file($templatefile);
-		&form_atlas();
+		&form_measurements();
        	}
 	
 }
@@ -127,20 +122,7 @@ sub form_atlas
 # Form: Calibration
 ##########################################################################
 
-sub form_calibration
-{
-	# Prepare template
-	&preparetemplate();
-
-	return();
-}
-
-
-##########################################################################
-# Form: LCD
-##########################################################################
-
-sub form_lcd
+sub form_measurements
 {
 	# Prepare template
 	&preparetemplate();
@@ -201,21 +183,17 @@ sub preparetemplate
 	# Navbar
 	our %navbar;
 
-	$navbar{10}{Name} = "$L{'COMMON.LABEL_ATLAS'}";
-	$navbar{10}{URL} = 'index.cgi?form=atlas';
-	$navbar{10}{active} = 1 if $q->{form} eq "atlas";
-	
-	$navbar{20}{Name} = "$L{'COMMON.LABEL_CALIBRATION'}";
-	$navbar{20}{URL} = 'index.cgi?form=calibration';
-	$navbar{20}{active} = 1 if $q->{form} eq "calibration";
+	$navbar{10}{Name} = "$L{'COMMON.LABEL_MEASUREMENTS'}";
+	$navbar{10}{URL} = 'index.cgi?form=measurements';
+	$navbar{10}{active} = 1 if $q->{form} eq "measurements";
 
-	$navbar{30}{Name} = "$L{'COMMON.LABEL_LCD'}";
-	$navbar{30}{URL} = 'index.cgi?form=lcd';
-	$navbar{30}{active} = 1 if $q->{form} eq "lcd";
+	$navbar{20}{Name} = "$L{'COMMON.LABEL_ATLAS'}";
+	$navbar{20}{URL} = 'index.cgi?form=atlas';
+	$navbar{20}{active} = 1 if $q->{form} eq "atlas";
 	
-	$navbar{40}{Name} = "$L{'COMMON.LABEL_SETTINGS'}";
-	$navbar{40}{URL} = 'index.cgi?form=settings';
-	$navbar{40}{active} = 1 if $q->{form} eq "settings";
+	$navbar{30}{Name} = "$L{'COMMON.LABEL_SETTINGS'}";
+	$navbar{30}{URL} = 'index.cgi?form=settings';
+	$navbar{30}{active} = 1 if $q->{form} eq "settings";
 	
 	$navbar{98}{Name} = "$L{'COMMON.LABEL_LOGS'}";
 	$navbar{98}{URL} = 'index.cgi?form=logs';

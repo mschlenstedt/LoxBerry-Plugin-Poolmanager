@@ -551,7 +551,8 @@ function getconfig() {
 			sensors = undefined;
 		} else {
 			// Create table
-			var table = $('<table style="min-width:200px; width:100%" width="100%" data-role="table" id="sensorstable" data-mode="reflow" class="ui-responsive table-stripe ui-body-b">').appendTo('#sensors-list');
+			var table = $('<table style="min-width:200px; width:100%" width="100%" data-role="table" id="sensorstable" data-mode="reflow"\
+				class="ui-responsive table-stripe ui-body-b">').appendTo('#sensors-list');
 			// Add the header row
 			var theader = $('<thead />').appendTo(table);
 			var theaderrow = $('<tr class="ui-bar-b"/>').appendTo(theader);
@@ -572,15 +573,18 @@ function getconfig() {
 				<a href="javascript:popup_edit_sensor(\'' + item.name + '\')" id="btneditsensor_'+item.name+'" name="btneditsensor_'+item.name+'" \
                                 title="<TMPL_VAR COMMON.BUTTON_EDIT> ' + item.name + '"> \
                                 <img src="./images/settings_20.png" height="20"></img></a> \
-                                \
-                                <a href="javascript:popup_delete_sensor(\'' + item.name + '\')" id="btnaskdeletesensor_'+item.name+'" name="btnaskdeletesensor_'+item.name+'" \
+                                <a href="javascript:popup_delete_sensor(\'' + item.name + '\')" id="btnaskdeletesensor_'+item.name+'"\
+				name="btnaskdeletesensor_'+item.name+'" \
                                 title="<TMPL_VAR COMMON.BUTTON_DELETE> ' + item.name + '"> \
                                 <img src="./images/cancel_20.png" height="20"></img></a> \
                                 ' }).appendTo(row);
                                 $(row).trigger("create");
 				// Box for Calibration Form
 				if (document.getElementById("calibration_overview")) {
-				        calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'><img src='./images/input_title_32.png'></span>&nbsp;"+item.name+"</h2><div class='box'><div class='boxrow'><div class='boxitem'><span class='large bold' id='value"+item.address+"'></span>&nbsp;<span class='tiny'>"+item.lcd_unit+"</span></div></div></div></div>"
+				        calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'>\
+						<img src='./images/input_title_32.png'></span>&nbsp;"+item.name+"</h2><div class='box'>\
+						<div class='boxrow'><div class='boxitem'><span class='large bold' id='value"+item.address+"'></span>\
+						&nbsp;<span class='tiny'>"+item.lcd_unit+"</span></div></div></div></div>"
 				}
 			});
 		};
@@ -595,7 +599,8 @@ function getconfig() {
 			actors = undefined;
 		} else {
 			// Create table
-			var table = $('<table style="min-width:200px; width:100%" width="100%" data-role="table" id="actorstable" data-mode="reflow" class="ui-responsive table-stripe ui-body-b">').appendTo('#actors-list');
+			var table = $('<table style="min-width:200px; width:100%" width="100%" data-role="table" id="actorstable" data-mode="reflow"\
+				class="ui-responsive table-stripe ui-body-b">').appendTo('#actors-list');
 			// Add the header row
 			var theader = $('<thead />').appendTo(table);
 			var theaderrow = $('<tr class="ui-bar-b"/>').appendTo(theader);
@@ -616,15 +621,18 @@ function getconfig() {
 				<a href="javascript:popup_edit_actor(\'' + item.name + '\')" id="btneditactor_'+item.name+'" name="btneditactor_'+item.name+'" \
                                 title="<TMPL_VAR COMMON.BUTTON_EDIT> ' + item.name + '"> \
                                 <img src="./images/settings_20.png" height="20"></img></a> \
-                                \
-                                <a href="javascript:popup_delete_actor(\'' + item.name + '\')" id="btnaskdeleteactor_'+item.name+'" name="btnaskdeleteactor_'+item.name+'" \
+                                <a href="javascript:popup_delete_actor(\'' + item.name + '\')" id="btnaskdeleteactor_'+item.name+'" \
+				name="btnaskdeleteactor_'+item.name+'" \
                                 title="<TMPL_VAR COMMON.BUTTON_DELETE> ' + item.name + '"> \
                                 <img src="./images/cancel_20.png" height="20"></img></a> \
                                 ' }).appendTo(row);
                                 $(row).trigger("create");
 				// Box for Calibration Form
 				if (document.getElementById("calibration_overview")) {
-			        	calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'><img src='./images/output_title_32.png'></span>&nbsp;"+item.name+"</h2><div class='box'><div class='boxrow'><div class='boxitem'><span class='large bold' id='value"+item.address+"'></span>&nbsp;<span class='tiny''>"+item.lcd_unit+"</span></div></div></div></div>"
+			        	calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'>\
+						<img src='./images/output_title_32.png'></span>&nbsp;"+item.name+"</h2><div class='box'><div class='boxrow'>\
+						<div class='boxitem'><span class='large bold' id='value"+item.address+"'></span>&nbsp;\
+						<span class='tiny''>"+item.lcd_unit+"</span></div></div></div></div>"
 				}
 			});
 		};
