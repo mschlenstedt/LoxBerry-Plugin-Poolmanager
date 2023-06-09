@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 import io
 import sys
@@ -30,7 +30,7 @@ def get_devices():
             moduletype = response.split(",")[1] 
             response = device.query("name,?").split(",")[1]
         except IndexError:
-            print(">> WARNING: device at I2C address " + str(i) + " has not been identified as an EZO device, and will not be queried") 
+            #print(">> WARNING: device at I2C address " + str(i) + " has not been identified as an EZO device, and will not be queried") 
             continue
         device_list.append(AtlasI2C(address = i, moduletype = moduletype, name = response))
     return device_list 
