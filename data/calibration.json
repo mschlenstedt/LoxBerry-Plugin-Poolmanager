@@ -1,0 +1,64 @@
+{
+	"calibration": {
+		"pH": {
+			"1": {
+				"step": "cal_mid",
+		   		"command": "Cal,mid",
+		   		"precommand": "",
+				"enter_value": 0
+			},
+			"2": {
+				"step": "cal_low",
+		   		"command": "Cal,low",
+		   		"precommand": "",
+				"enter_value": 0
+			},
+			"3": {
+				"step": "cal_high",
+		   		"command": "Cal,high",
+		   		"precommand": "",
+				"enter_value": 0
+			}
+		},
+		"ORP": {
+			"1": {
+				"step": "cal_mid",
+		   		"command": "Cal",
+		   		"precommand": "",
+				"enter_value": 0
+			}
+		},
+		"RTD": {
+			"1": {
+				"step": "cal_mid",
+		   		"command": "Cal",
+		   		"precommand": "",
+				"enter_value": 0
+			}
+		},
+		"FLO": {
+		},
+		"PRS": {
+			"1": {
+				"step": "cal_low",
+		   		"command": "Cal",
+		   		"precommand": "",
+				"enter_value": 0
+			},
+			"2": {
+				"step": "cal_high",
+		   		"command": "Cal",
+		   		"precommand": "",
+				"enter_value": 0
+			}
+		},
+		"PMP": {
+			"1": {
+				"step": "cal_mid",
+		   		"command": "Cal",
+		   		"precommand": "d",
+				"enter_value": 1
+			}
+		}
+	}
+}

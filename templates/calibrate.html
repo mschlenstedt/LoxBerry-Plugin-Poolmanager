@@ -1,0 +1,242 @@
+<style>
+.datahidden {
+	display:none;
+}
+
+.tiny {
+	font-size:70%;
+}
+
+.small {
+	font-size:80%;
+}
+
+.middle {
+	font-size:120%;
+}
+
+.big {
+	font-size:250%;
+}
+
+.large {
+	font-size:400%;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.grayed {
+	color: gray;
+}
+
+.center {
+	text-align: center;
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	grid-column-gap: 15px;
+	grid-row-gap: 15px;
+	text-shadow: none;
+}
+
+.box { 
+	border: 1px solid black;
+	border-radius: 5px 5px 5px 5px;
+	padding: 5px;
+}
+
+.boxtitle {
+	background-color: #6dac20;
+	color: white;
+	text-shadow: 1px 1px 2px black;
+	border-radius: 5px 5px 5px 5px;
+	padding: 5px;
+	vertical-align: middle;
+}
+
+.boxrow {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
+	align-items: center;
+	padding: 0;
+	margin: 0;
+}
+
+.boxitem {
+	padding: 5px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.servicestatus {
+	display: grid;
+	grid-template-columns: auto auto auto auto;
+	grid-template-rows: 1fr;
+	gap: 0px 10px;
+	justify-content: center;
+	justify-items: center;
+	align-items: center;
+	text-shadow: none;
+}
+
+.margin {
+	margin: 10px;
+}
+
+.status {
+	padding: 7px;
+	box-sizing: border-box;
+	border-radius: 5px 5px 5px 5px;
+	background: #dfdfdf;
+	border: 1px solid #7E7E7E;
+	width: 170px;
+	text-align: center;
+}
+
+.ui-popup-container
+{
+	width:  50%;
+	height: 80%;
+}
+
+.custom-btn {
+    width: 250px !important;
+}
+
+</style>
+
+<div id="vars_address"></div>
+<div id="vars_step0"></div>
+<div id="vars_step1"></div>
+<div id="vars_step2"></div>
+<div id="vars_step3"></div>
+
+<br>
+
+<div class="grid" id="calibration">
+	<div>
+		<div id="calibration_title"></div>
+		<div class='box' id="calibration_value_box">
+			<div id="calibration_value"></div>
+		</div>
+		<br>
+		<div class='box' id="calibration_step0" style="display: none">
+			<div class="boxrow">
+				<div class="boxitem"><TMPL_VAR "ATLAS.LABEL_CALIBRATION_STEP0"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><a href="#" onclick="calibrate_step0(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "ATLAS.BUTTON_CALIBRATION_START"></a></div>
+			</div>
+		</div>
+
+		<div class='box' id="calibration_step1" style="display: none">
+			<div class="boxrow">
+				<div class="boxitem"><TMPL_VAR "ATLAS.LABEL_CALIBRATION_STEP1"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem" id="step1_caltarget"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><a href="#" onclick="calibrate_step1(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "ATLAS.BUTTON_CALIBRATION"></a></div>
+			</div>
+		</div>
+
+		<div class='box' id="calibration_step1_enter" style="display: none">
+			<div class="boxrow">
+				<div class="boxitem"><TMPL_VAR "ATLAS.LABEL_CALIBRATION_ENTER_STEP1"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><input type="number" data-clear-btn="true" id="step1_measured_value" value=""></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><a href="#" onclick="calibrate_step1(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "ATLAS.BUTTON_CALIBRATION"></a></div>
+			</div>
+		</div>
+
+		<div class='box' id="calibration_step2" style="display: none">
+			<div class="boxrow">
+				<div class="boxitem"><TMPL_VAR "ATLAS.LABEL_CALIBRATION_STEP2"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem" id="step2_caltarget"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><a href="#" onclick="calibrate_step2(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "ATLAS.BUTTON_CALIBRATION"></a></div>
+			</div>
+		</div>
+
+		<div class='box' id="calibration_step2_enter" style="display: none">
+			<div class="boxrow">
+				<div class="boxitem"><TMPL_VAR "ATLAS.LABEL_CALIBRATION_ENTER_STEP2"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><input type="number" data-clear-btn="true" id="step2_measured_value" value=""></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><a href="#" onclick="calibrate_step2(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "ATLAS.BUTTON_CALIBRATION"></a></div>
+			</div>
+		</div>
+
+		<div class='box' id="calibration_step3" style="display: none">
+			<div class="boxrow">
+				<div class="boxitem"><TMPL_VAR "ATLAS.LABEL_CALIBRATION_STEP3"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem" id="step3_caltarget"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><a href="#" onclick="calibrate_step3(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "ATLAS.BUTTON_CALIBRATION"></a></div>
+			</div>
+		</div>
+
+		<div class='box' id="calibration_step3_enter" style="display: none">
+			<div class="boxrow">
+				<div class="boxitem"><TMPL_VAR "ATLAS.LABEL_CALIBRATION_ENTER_STEP3"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><input type="number" data-clear-btn="true" id="step3_measured_value" value=""></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><a href="#" onclick="calibrate_step3(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "ATLAS.BUTTON_CALIBRATION"></a></div>
+			</div>
+		</div>
+
+		<div class='box' id="calibration_step4" style="display: none">
+			<div class="boxrow">
+				<div class="boxitem"><TMPL_VAR "ATLAS.LABEL_CALIBRATION_STEP4"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><a href="#" onclick="calibrate_step4(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "ATLAS.BUTTON_CALIBRATION_END"></a></div>
+			</div>
+		</div>
+
+		<div class='box' id="calibration_step5" style="display: none">
+			<div class="boxrow">
+				<div class="boxitem"><TMPL_VAR "ATLAS.LABEL_CALIBRATION_STEP5"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><a href="#" onclick="window.close(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "ATLAS.BUTTON_WINDOW_CLOSE"></a></div>
+			</div>
+		</div>
+
+		<div class='box' id="calibration_nodata" style="display: none">
+			<div class="boxrow">
+				<div class="boxitem"><TMPL_VAR "ATLAS.HINT_UNKNOWN_CALIBRATIONTYPE"></div>
+			</div>
+			<div class="boxrow">
+				<div class="boxitem"><a href="#" onclick="window.close(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "ATLAS.BUTTON_WINDOW_CLOSE"></a></div>
+			</div>
+		</div>
+
+	</div>
+</div>
+

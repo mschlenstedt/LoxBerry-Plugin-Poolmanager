@@ -206,7 +206,7 @@ sub printtemplate
 {
 
 	# Print out Template
-	LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "https://loxwiki.atlassian.net/wiki/spaces/LOXBERRY/pages/1254687237/LoxPoolManager", "");
+	LoxBerry::Web::lbheader($L{'COMMON.LABEL_PLUGINTITLE'} . " V$version", "https://wiki.loxberry.de/plugins/loxberry_poolmanager/start", "");
 	# Print your plugins notifications with name daemon.
 	print LoxBerry::Log::get_notifications_html($lbpplugindir, 'PoolManager');
 	print $templateout->output();

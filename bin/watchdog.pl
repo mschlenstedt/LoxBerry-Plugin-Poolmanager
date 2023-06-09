@@ -111,7 +111,7 @@ sub start
 	unlink ("/dev/shm/poolmanager-watchdog-stop.dat");
 
 	$log->default;
-	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
+	my $count = `pgrep -c -f "python3 atlasi2c-gateway.py"`;
 	chomp ($count);
 	$count--; # Perl itself runs pgrep with sh, which also match -f in pgrep
 	if ($count > "0") {
@@ -142,18 +142,15 @@ sub start
 	$poolmanagerlog->default;
 	LOGSTART "Starting PoolManager (atlasi2c-gateway)...";
 	my $dbkey = $poolmanagerlog->dbkey;
-	#system ("python3 $lbpbindir/atlasi2c-gateway.py --logfile=$logfile --loglevel=$loglevel --logdbkey=$dbkey &");
-	#system("python3", "$lbpbindir/atlasi2c-gateway.py", "--logfile=$logfile", "--loglevel=$loglevel", "--logdbkey=$dbkey", "--verbose", ">>", "/tmp/templogfile.log", "2>&1", "&");
-	# With system and background process (&) we often get i2c failures with the PMP. Is this really true?! I don't know.... But with fork() it seems to be better....
 	my $child_pid = fork();
 	die "Couldn't fork" unless defined $child_pid;
 	if (! $child_pid) {
-		exec "python3", "$lbpbindir/atlasi2c-gateway.py", "--logfile=$logfile", "--loglevel=$loglevel", "--logdbkey=$dbkey";
+		exec "cd $lbpbindir && python3 $lbpbindir/atlasi2c-gateway.py --logfile=$logfile --loglevel=$loglevel --logdbkey=$dbkey";
 		die "Couldn't exec myprogram: $!";
 	}
-	sleep 2;
+	sleep 5;
 
-	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
+	my $count = `pgrep -c -f "atlasi2c-gateway.py"`;
 	chomp ($count);
 	$count--; # Perl itself runs pgrep with sh, which also match -f in pgrep
 	$log->default;
@@ -161,7 +158,7 @@ sub start
 		LOGCRIT "Could not start PoolManager. Error: $?";
 		exit (1)
 	} else {
-		my $status = `pgrep -o -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
+		my $status = `pgrep -o -f "atlasi2c-gateway.py"`;
 		chomp ($status);
 		LOGOK "PoolManager started successfully. Running PID: $status";
 	}
@@ -177,16 +174,16 @@ sub stop
 
 	$log->default;
 	LOGINF "Stopping PoolManager (atlasi2c-gateway)...";
-	system ("pkill -f 'python3 $lbpbindir/atlasi2c-gateway.py' > /dev/null 2>&1");
+	system ("pkill -f 'atlasi2c-gateway.py' > /dev/null 2>&1");
 	sleep 2;
 
-	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
+	my $count = `pgrep -c -f "atlasi2c-gateway.py"`;
 	chomp ($count);
 	$count--; # Perl `` itself runs pgrep with sh, which also match -f in pgrep
 	if ($count eq "0") {
 		LOGOK "PoolManager stopped successfully.";
 	} else {
-		my $status = `pgrep -o -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
+		my $status = `pgrep -o -f "atlasi2c-gateway.py"`;
 		chomp ($status);
 		LOGCRIT "Could not stop PoolManager. Running PID: $status";
 		exit (1)
@@ -215,7 +212,7 @@ sub check
 	$log->default;
 	LOGINF "Checking Status of PoolManager...";
 	
-	my $count = `pgrep -c -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
+	my $count = `pgrep -c -f "atlasi2c-gateway.py"`;
 	chomp ($count);
 	$count--; # Perl `` itself runs pgrep with sh, which also match -f in pgrep
 	if ($count eq "0") {
@@ -230,7 +227,7 @@ sub check
 			&restart();
 		}
 	} else {
-		my $status = `pgrep -o -f "python3 $lbpbindir/atlasi2c-gateway.py"`;
+		my $status = `pgrep -o -f "atlasi2c-gateway.py"`;
 		chomp ($status);
 		LOGOK "PoolManager is running. Fine. Running PID: $status";
 		my $response = LoxBerry::System::write_file("/dev/shm/poolmanager-watchdog-fails.dat", "0");

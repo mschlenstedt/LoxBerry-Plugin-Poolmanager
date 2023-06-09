@@ -2,9 +2,9 @@
 use warnings;
 use strict;
 use LoxBerry::System;
-#use LoxBerry::Log;
 use CGI;
 use JSON;
+#use LoxBerry::Log;
 #use Data::Dumper;
 
 my $error;
@@ -50,8 +50,27 @@ if( $q->{action} eq "servicestatus" ) {
 }
 
 if( $q->{action} eq "getconfig" ) {
+	# From https://gist.github.com/theimpostor/79d4d37876aa990edd2ebc0e1d9391b5
+	require Hash::Merge;
+	Hash::Merge->import("merge");
+	my $merged = {};
+	my $json = JSON->new->utf8;
 	if ( -e "$lbpconfigdir/plugin.json" ) {
-		$response = LoxBerry::System::read_file("$lbpconfigdir/plugin.json");
+		$merged = merge( $merged, $json->decode( LoxBerry::System::read_file("$lbpconfigdir/plugin.json") ) );
+	}
+	if ( -e "$lbpdatadir/calibration.json" ) {
+		$merged = merge( $merged, $json->decode( LoxBerry::System::read_file("$lbpdatadir/calibration.json") ) );
+	}
+	if( !$merged ) {
+		$response = "{ }";
+	} else {
+		$response = $json->encode( $merged );
+	}
+}
+
+if( $q->{action} eq "getvalues" ) {
+	if ( -e "/dev/shm/poolmanager-measurements.json" ) {
+		$response = LoxBerry::System::read_file("/dev/shm/poolmanager-measurements.json");
 		if( !$response ) {
 			$response = "{ }";
 		}
@@ -244,6 +263,30 @@ if( $q->{action} eq "savesettings" ) {
 
 	$response = encode_json( $cfg );
 	
+}
+
+if( $q->{action} eq "sendcommand" ) {
+
+	if (!defined $q->{'command'} || $q->{'command'} eq "") {
+		$error = "Command cannot be empty";
+	}
+
+	if (!$error) {
+		require LoxBerry::JSON;
+		require LoxBerry::IO;
+		my $cfgfile = "$lbpconfigdir/plugin.json";
+		my $jsonobj = LoxBerry::JSON->new();
+		my $cfg = $jsonobj->open(filename => $cfgfile);
+
+		$cfg->{'topic'} = "poolmanager" if !$cfg->{'topic'};
+		my $return = LoxBerry::IO::mqtt_publish( $cfg->{'topic'} . "/set/command", $q->{'command'} );
+		my %response = (
+			message => $return,
+		);
+		chomp (%response);
+		$response = encode_json( \%response );
+	}
+
 }
 
 #####################################

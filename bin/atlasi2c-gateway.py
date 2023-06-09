@@ -27,6 +27,8 @@ laststatus = 0
 lastvalues = 0
 lastalive = 0
 stop = 0
+calibrate = 0
+valuecycle = 0
 devices = dict()
 device_list = list()
 pconfig = dict()
@@ -76,6 +78,8 @@ def readconfig():
         if str(pconfig['topic']) == "":
             log.warning("MQTT Topic is not set. Set it to default topic 'poolmanager'.")
             pconfig['topic'] = "poolmanager"
+        global valuecycle
+        valuecycle = int(pconfig['valuecycle'])
 
         # Parse snesors and actors
         for item in pconfig['sensors']:
@@ -148,10 +152,10 @@ def getstatus():
                 continue
             values_arr = response.split(": ")[1].split(",")
             origcommand = response.split(": ")[1].split(",")[0]
-            #print ("RESPONSE: " )
-            #print (response.encode('utf-8'))
-            #print ("ORIGNINAL COMMAND: ")
-            #print (origcommand.encode('utf-8'))
+            print ("RESPONSE: " )
+            print (response.encode('utf-8'))
+            print ("ORIGNINAL COMMAND: ")
+            print (origcommand.encode('utf-8'))
             address = response.split(": ")[0].split(" ")[2]
             log.debug("Sensor response: %s" % response)
             if response.startswith("Success"):
@@ -242,11 +246,13 @@ def getstatus():
 
 def getvalues():
     
+    values_dict = dict()
     delaytime = device.long_timeout
     for dev in device_list:
         log.debug("Get sensor value for sensor %s" % str(dev.address))
         try:
             dev.write("R")
+            values_dict[dev.address] = {}
         except:
             log.error("Could not write to sensor %s." % str(dev.address))
     time.sleep(delaytime)
@@ -265,10 +271,19 @@ def getvalues():
             i = 0
             for value in values_arr:
                 i += 1
-                client.publish(topic + "/value" + str(i),value,retain=1)
-                time.sleep(mqttpause)
+                if calibrate == 0:
+                    client.publish(topic + "/value" + str(i),value,retain=1)
+                    time.sleep(mqttpause)
+                values_dict[dev.address]["value"+str(i)] = value
         else:
             log.error("Error updating values for sensor %s. Sensor response: %s" % (str(dev.address), response))
+        # Save values also in tmp json for cal and lcd
+        log.debug("Saving values to temporary json file for %s" % str(dev.address))
+        try:
+            with open('/dev/shm/poolmanager-measurements.json', 'w', encoding='utf-8') as f:
+                json.dump(values_dict, f, ensure_ascii=False, indent=4)
+        except:
+            log.error("Could not save values to temporary json file for %s." % str(dev.address))
 
 def setnames():
     for dev in device_list:
@@ -359,6 +374,10 @@ log.setLevel(logging.INFO)
 log.info("Starting Logfile for acsensors.py. The Loglevel is %s" % loglevel.upper())
 log.setLevel(numeric_loglevel)
 
+log.debug("Enironment:")
+for k, v in os.environ.items():
+    log.debug(f'{k}={v}')
+
 # Read MQTT config
 mqttconfig = dict()
 mqttconfig['server'] = os.popen("perl -e 'use LoxBerry::IO; my $mqttcred = LoxBerry::IO::mqtt_connectiondetails(); print $mqttcred->{brokerhost}; exit'").read()
@@ -411,6 +430,7 @@ while not client.connected_flag: #wait in loop
 # Basic needed vars - Part 2
 device = AtlasI2C()
 client.publish(pretopic + "/plugin/pause",0,retain=1)
+client.publish(pretopic + "/plugin/calibration_mode",0,retain=1)
 
 # Exit handler
 #atexit.register(exit_handler)
@@ -448,8 +468,18 @@ while True:
                 elif command == "start":
                     log.info("Start reading from all sensors.")
                     client.publish(pretopic + "/plugin/pause",0,retain=1)
+                    client.publish(pretopic + "/plugin/calibration_mode",0,retain=1)
                     stop = 0
+                    calibrate = 0
+                    valuecycle = pconfig['valuecycle']
                     response = "Success plugin: start"
+                # Calibrate
+                elif command == "calibrate":
+                    log.info("Start calibration mode.")
+                    client.publish(pretopic + "/plugin/calibration_mode",1,retain=1)
+                    calibrate = 1
+                    valuecycle = 1.5
+                    response = "Success plugin: calibrate"
                 # Read Status
                 elif command == "getstatus":
                     log.info("Reading Status for all sensors.")
@@ -499,7 +529,7 @@ while True:
 
     # Getting the current date and time
     now = time.time()
-    log.debug("Timestamp: %s Last status: %s (Cycle: %s) Last values: %s (Cycle: %s)" % (str(now), str(laststatus), str(pconfig['statuscycle']), str(lastvalues), str(pconfig['valuecycle'])))
+    log.debug("Timestamp: %s Last status: %s (Cycle: %s) Last values: %s (Cycle: %s)" % (str(now), str(laststatus), str(pconfig['statuscycle']), str(lastvalues), str(valuecycle)))
 
     # Send alive timestamp every 60 seconds
     if now > lastalive + 60:
@@ -515,7 +545,7 @@ while True:
         getstatus()
 
     # Check if it is time to update the values
-    if now > lastvalues + int(pconfig['valuecycle']) and stop == 0:
+    if now > lastvalues + int(valuecycle) and stop == 0:
         lastvalues = now
         log.info("--> Getting sensor values <--")
         getvalues()

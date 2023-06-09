@@ -5,7 +5,7 @@ $(function() {
 	if (document.getElementById("servicestatus")) {
 		interval = window.setInterval(function(){ servicestatus(); }, 5000);
 	}
-	if (document.getElementById("calibration_overview")) {
+	if (document.getElementById("calibration_overview") || document.getElementById("calibration")) {
 		intervalm = window.setInterval(function(){ measurements(); }, 1000);
 	}
 	servicestatus();
@@ -535,6 +535,11 @@ function getconfig() {
 		console.log( "getconfig Success", data );
 		$("#main").css( 'visibility', 'visible' );
 
+		// CALIBRATION
+
+		calibrate = "<TMPL_VAR CALIBRATE>";
+		address = "<TMPL_VAR ADDRESS>";
+
 		// Settings
 
 		$("#statuscycle_settings").val(data.statuscycle);
@@ -580,11 +585,75 @@ function getconfig() {
                                 ' }).appendTo(row);
                                 $(row).trigger("create");
 				// Box for Calibration Form
-				if (document.getElementById("calibration_overview")) {
+				if ( document.getElementById("calibration_overview") && calibrate != "1") {
 				        calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'>\
 						<img src='./images/input_title_32.png'></span>&nbsp;"+item.name+"</h2><div class='box'>\
 						<div class='boxrow'><div class='boxitem'><span class='large bold' id='value"+item.address+"'></span>\
-						&nbsp;<span class='tiny'>"+item.lcd_unit+"</span></div></div></div></div>"
+						&nbsp;<span class='small'>"+item.lcd_unit+"</span></div></div><div class='boxrow'><div class='boxitem'>\
+						<a href='#' onclick=\"window.open('./calibrate.cgi?address="+item.address+"', 'NewWindow1','scrollbars=true,toolbar=no,location=no,\
+						directories=no,status=no,menubar=no,copyhistory=no,width=800,height=800')\" id='btncalibrate"+item.address+"'\
+						class='ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-eye ui-corner-all'><TMPL_VAR 'ATLAS.BUTTON_CALIBRATE'></a>\
+						</div></div>"
+					if (item.calibrate != "1") {
+						$("#btncalibrate"+item.address).addClass('ui-disabled');
+					}
+					calibration_overview.innerHTML += "</div></div>"
+				}
+				// Box for Calibration Process
+				if ( document.getElementById("calibration") && calibrate == "1" && item.address == address ) {
+					vars_address.innerHTML = "<input type='hidden' id='address' value='" + address + "'>";
+					calibration_title.innerHTML = "<h2 class='boxtitle ui-title'><span style='vertical-align:middle'>\
+						<img src='./images/input_title_32.png'></span>&nbsp;<TMPL_VAR 'ATLAS.BUTTON_CALIBRATION'>&nbsp;"+item.name+"</h2>"
+				        calibration_value.innerHTML = "<div class='boxrow'><div class='boxitem'>\
+						<span class='large bold' id='value"+item.address+"'></span>\
+						&nbsp;<span class='small'>"+item.lcd_unit+"</span></div></div>"
+					if ( data["calibration"][item.type]["1"] && item[data["calibration"][item.type]["1"]["step"]] ) {
+						vars_step1.innerHTML = "<input type='hidden' id='step1_enabled' value='1'>\
+							<input type='hidden' id='step1_command' value='" + data["calibration"][item.type]["1"]["command"] + "'>\
+							<input type='hidden' id='step1_precommand' value='" + data["calibration"][item.type]["1"]["precommand"] + "'>\
+							<input type='hidden' id='step1_enter_value' value='" + data["calibration"][item.type]["1"]["enter_value"] + "'>\
+							<input type='hidden' id='step1_target' value='" + item[data["calibration"][item.type]["1"]["step"]] + "'>";
+						step1_caltarget.innerHTML = "<h2>" + item[data["calibration"][item.type]["1"]["step"]] + " " + item.lcd_unit + "</h2>";
+					} else {
+						vars_step1.innerHTML = "<input type='hidden' id='step1_enabled' value='0'>\
+							<input type='hidden' id='step1_command' value='0'>\
+							<input type='hidden' id='step1_precommand' value='0'>\
+							<input type='hidden' id='step1_enter_value' value='0'>\
+							<input type='hidden' id='step1_target' value='0'>";
+					}
+					if ( data["calibration"][item.type]["2"] && item[data["calibration"][item.type]["2"]["step"]] ) {
+						vars_step2.innerHTML = "<input type='hidden' id='step2_enabled' value='1'>\
+							<input type='hidden' id='step2_command' value='" + data["calibration"][item.type]["2"]["command"] + "'>\
+							<input type='hidden' id='step2_precommand' value='" + data["calibration"][item.type]["2"]["precommand"] + "'>\
+							<input type='hidden' id='step2_enter_value' value='" + data["calibration"][item.type]["2"]["enter_value"] + "'>\
+							<input type='hidden' id='step2_target' value='" + item[data["calibration"][item.type]["2"]["step"]] + "'>";
+						step2_caltarget.innerHTML = "<h2>" + item[data["calibration"][item.type]["2"]["step"]] + " " + item.lcd_unit + "</h2>";
+					} else {
+						vars_step2.innerHTML = "<input type='hidden' id='step2_enabled' value='0'>\
+							<input type='hidden' id='step2_command' value='0'>\
+							<input type='hidden' id='step2_precommand' value='0'>\
+							<input type='hidden' id='step2_enter_value' value='0'>\
+							<input type='hidden' id='step2_target' value='0'>";
+					}
+					if ( data["calibration"][item.type]["3"] && item[data["calibration"][item.type]["3"]["step"]] ) {
+						vars_step3.innerHTML = "<input type='hidden' id='step3_enabled' value='1'>\
+							<input type='hidden' id='step3_command' value='" + data["calibration"][item.type]["3"]["command"] + "'>\
+							<input type='hidden' id='step3_precommand' value='" + data["calibration"][item.type]["3"]["precommand"] + "'>\
+							<input type='hidden' id='step3_enter_value' value='" + data["calibration"][item.type]["3"]["enter_value"] + "'>\
+							<input type='hidden' id='step3_target' value='" + item[data["calibration"][item.type]["3"]["step"]] + "'>";
+						step3_caltarget.innerHTML = "<h2>" + item[data["calibration"][item.type]["3"]["step"]] + " " + item.lcd_unit + "</h2>";
+					} else {
+						vars_step3.innerHTML = "<input type='hidden' id='step3_enabled' value='0'>\
+							<input type='hidden' id='step3_command' value='0'>\
+							<input type='hidden' id='step3_precommand' value='0'>\
+							<input type='hidden' id='step3_enter_value' value='0'>\
+							<input type='hidden' id='step3_target' value='0'>";
+					}
+					if ( $("#step1_enabled").val() == "1" ) {
+						$("#calibration_step0").css( 'display', 'block' );
+					} else {
+						$("#calibration_nodata").css( 'display', 'block' );
+					}
 				}
 			});
 		};
@@ -628,11 +697,74 @@ function getconfig() {
                                 ' }).appendTo(row);
                                 $(row).trigger("create");
 				// Box for Calibration Form
-				if (document.getElementById("calibration_overview")) {
-			        	calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'>\
-						<img src='./images/output_title_32.png'></span>&nbsp;"+item.name+"</h2><div class='box'><div class='boxrow'>\
-						<div class='boxitem'><span class='large bold' id='value"+item.address+"'></span>&nbsp;\
-						<span class='tiny''>"+item.lcd_unit+"</span></div></div></div></div>"
+				if ( document.getElementById("calibration_overview") && calibrate != "1") {
+				        calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'>\
+						<img src='./images/input_title_32.png'></span>&nbsp;"+item.name+"</h2><div class='box'>\
+						<div class='boxrow'><div class='boxitem'><span class='large bold' id='value"+item.address+"'></span>\
+						&nbsp;<span class='small'>"+item.lcd_unit+"</span></div></div><div class='boxrow'><div class='boxitem'>\
+						<a href='#' onclick=\"window.open('./calibrate.cgi?address="+item.address+"', 'NewWindow1','scrollbars=true,toolbar=no,location=no,\
+						directories=no,status=no,menubar=no,copyhistory=no,width=800,height=800')\" id='btncalibrate"+item.address+"'\
+						class='ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-eye ui-corner-all'><TMPL_VAR 'ATLAS.BUTTON_CALIBRATE'></a>\
+						</div></div>"
+					if (item.calibrate != "1") {
+						$("#btncalibrate"+item.address).addClass('ui-disabled');
+					}
+					calibration_overview.innerHTML += "</div></div>"
+				}
+				// Box for Calibration Process
+				if ( document.getElementById("calibration") && calibrate == "1" && item.address == address ) {
+					vars_address.innerHTML = "<input type='hidden' id='address' value='" + address + "'>";
+					calibration_title.innerHTML = "<h2 class='boxtitle ui-title'><span style='vertical-align:middle'>\
+						<img src='./images/input_title_32.png'></span>&nbsp;<TMPL_VAR 'ATLAS.BUTTON_CALIBRATION'>&nbsp;"+item.name+"</h2>"
+				        calibration_value.innerHTML = "<div class='boxrow'><div class='boxitem'>\
+						<span class='large bold' id='value"+item.address+"'></span>\
+						&nbsp;<span class='small'>"+item.lcd_unit+"</span></div></div>"
+					if ( data["calibration"][item.type]["1"] && item[data["calibration"][item.type]["1"]["step"]] ) {
+						vars_step1.innerHTML = "<input type='hidden' id='step1_enabled' value='1'>\
+							<input type='hidden' id='step1_command' value='" + data["calibration"][item.type]["1"]["command"] + "'>\
+							<input type='hidden' id='step1_precommand' value='" + data["calibration"][item.type]["1"]["precommand"] + "'>\
+							<input type='hidden' id='step1_enter_value' value='" + data["calibration"][item.type]["1"]["enter_value"] + "'>\
+							<input type='hidden' id='step1_target' value='" + item[data["calibration"][item.type]["1"]["step"]] + "'>";
+						step1_caltarget.innerHTML = "<h2>" + item[data["calibration"][item.type]["1"]["step"]] + " " + item.lcd_unit + "</h2>";
+					} else {
+						vars_step1.innerHTML = "<input type='hidden' id='step1_enabled' value='0'>\
+							<input type='hidden' id='step1_command' value='0'>\
+							<input type='hidden' id='step1_precommand' value='0'>\
+							<input type='hidden' id='step1_enter_value' value='0'>\
+							<input type='hidden' id='step1_target' value='0'>";
+					}
+					if ( data["calibration"][item.type]["2"] && item[data["calibration"][item.type]["2"]["step"]] ) {
+						vars_step2.innerHTML = "<input type='hidden' id='step2_enabled' value='1'>\
+							<input type='hidden' id='step2_command' value='" + data["calibration"][item.type]["2"]["command"] + "'>\
+							<input type='hidden' id='step2_precommand' value='" + data["calibration"][item.type]["2"]["precommand"] + "'>\
+							<input type='hidden' id='step2_enter_value' value='" + data["calibration"][item.type]["2"]["enter_value"] + "'>\
+							<input type='hidden' id='step2_target' value='" + item[data["calibration"][item.type]["2"]["step"]] + "'>";
+						step2_caltarget.innerHTML = "<h2>" + item[data["calibration"][item.type]["2"]["step"]] + " " + item.lcd_unit + "</h2>";
+					} else {
+						vars_step2.innerHTML = "<input type='hidden' id='step2_enabled' value='0'>\
+							<input type='hidden' id='step2_command' value='0'>\
+							<input type='hidden' id='step2_precommand' value='0'>\
+							<input type='hidden' id='step2_enter_value' value='0'>\
+							<input type='hidden' id='step2_target' value='0'>";
+					}
+					if ( data["calibration"][item.type]["3"] && item[data["calibration"][item.type]["3"]["step"]] ) {
+						vars_step3.innerHTML = "<input type='hidden' id='step3_enabled' value='1'>\
+							<input type='hidden' id='step3_command' value='" + data["calibration"][item.type]["3"]["command"] + "'>\
+							<input type='hidden' id='step3_precommand' value='" + data["calibration"][item.type]["3"]["precommand"] + "'>\
+							<input type='hidden' id='step3_enter_value' value='" + data["calibration"][item.type]["3"]["enter_value"] + "'>\
+							<input type='hidden' id='step3_target' value='" + item[data["calibration"][item.type]["3"]["step"]] + "'>";
+						step3_caltarget.innerHTML = "<h2>" + item[data["calibration"][item.type]["3"]["step"]] + " " + item.lcd_unit + "</h2>";
+					} else {
+						vars_step3.innerHTML = "<input type='hidden' id='step3_enabled' value='0'>\
+							<input type='hidden' id='step3_command' value='0'>\
+							<input type='hidden' id='step3_precommand' value='0'>\
+							<input type='hidden' id='step3_enter_value' value='0'>\
+							<input type='hidden' id='step3_target' value='0'>";
+					}
+					if ( $("#step1_enabled").val() == "1" ) {
+						$("#calibration_step0").css( 'display', 'block' );
+					} else {
+					}
 				}
 			});
 		};
@@ -647,6 +779,192 @@ function getconfig() {
 			measurements();
 		}
 	})
+
+}
+
+// CALIBRATION STEPS
+
+function calibrate_step0() {
+
+		$("#calibration_step0").css( 'display', 'none' );
+		$("#calibration_step1").css( 'display', 'none' );
+		$("#calibration_step2").css( 'display', 'none' );
+		$("#calibration_step3").css( 'display', 'none' );
+		$("#calibration_step4").css( 'display', 'none' );
+		$("#calibration_step5").css( 'display', 'none' );
+		$("#calibration_step1_enter").css( 'display', 'none' );
+		$("#calibration_step2_enter").css( 'display', 'none' );
+		$("#calibration_step3_enter").css( 'display', 'none' );
+		// Start Calibration Mode here
+		sendcommand("plugin:calibrate");
+		if ( $("#step1_enabled").val() == "1" ) {
+			$("#calibration_step1").css( 'display', 'block' );
+		} else {
+			calibrate_step1()
+		}
+
+}
+
+function calibrate_step1() {
+
+		$("#calibration_step0").css( 'display', 'none' );
+		$("#calibration_step1").css( 'display', 'none' );
+		$("#calibration_step2").css( 'display', 'none' );
+		$("#calibration_step3").css( 'display', 'none' );
+		$("#calibration_step4").css( 'display', 'none' );
+		$("#calibration_step5").css( 'display', 'none' );
+		$("#calibration_step1_enter").css( 'display', 'none' );
+		$("#calibration_step2_enter").css( 'display', 'none' );
+		$("#calibration_step3_enter").css( 'display', 'none' );
+		if ( $("#step1_enabled").val() == "1" ) {
+			if ( $("#step1_enter_value").val() == "1" ) {
+				if ( $("#step1_measured_value").val() == "" ) {
+					// Send Precommand here
+					command = $("#address").val() + ":" + $("#step1_precommand").val() + "," + $("#step1_target").val().replaceAll(",", ".");
+					console.log ("Sending PreCommand: " + command);
+					sendcommand(command);
+					$("#calibration_step1_enter").css( 'display', 'block' );
+					return;
+				} else {
+					// Send Cal command here
+					command = $("#address").val() + ":" + $("#step1_command").val() + "," + $("#step1_measured_value").val().replaceAll(",", ".");
+					console.log ("Sending Command: " + command);
+					sendcommand(command);
+				}
+			} else {
+				// Send Cal command here
+				command = $("#address").val() + ":" + $("#step1_command").val() + "," + $("#step1_target").val().replaceAll(",", ".");
+				console.log ("Sending Command: " + command);
+				sendcommand(command);
+			}
+		}
+		if ( $("#step2_enabled").val() == "1" ) {
+			$("#calibration_step2").css( 'display', 'block' );
+		} else {
+			calibrate_step2()
+		}
+
+}
+
+function calibrate_step2() {
+
+		$("#calibration_step0").css( 'display', 'none' );
+		$("#calibration_step1").css( 'display', 'none' );
+		$("#calibration_step2").css( 'display', 'none' );
+		$("#calibration_step3").css( 'display', 'none' );
+		$("#calibration_step4").css( 'display', 'none' );
+		$("#calibration_step5").css( 'display', 'none' );
+		$("#calibration_step1_enter").css( 'display', 'none' );
+		$("#calibration_step2_enter").css( 'display', 'none' );
+		$("#calibration_step3_enter").css( 'display', 'none' );
+		if ( $("#step2_enabled").val() == "1" ) {
+			if ( $("#step2_enter_value").val() == "1" ) {
+				if ( $("#step2_measured_value").val() == "" ) {
+					// Send Precommand here
+					command = $("#address").val() + ":" + $("#step2_precommand").val() + "," + $("#step2_target").val().replaceAll(",", ".");
+					console.log ("Sending PreCommand: " + command);
+					sendcommand(command);
+					$("#calibration_step2_enter").css( 'display', 'block' );
+					return;
+				} else {
+					// Send Cal command here
+					command = $("#address").val() + ":" + $("#step2_command").val() + "," + $("#step2_measured_value").val().replaceAll(",", ".");
+					console.log ("Sending Command: " + command);
+					sendcommand(command);
+				}
+			} else {
+				// Send Cal command here
+				command = $("#address").val() + ":" + $("#step2_command").val() + "," + $("#step2_target").val().replaceAll(",", ".");
+				console.log ("Sending Command: " + command);
+				sendcommand(command);
+			}
+		}
+		if ( $("#step3_enabled").val() == "1" ) {
+			$("#calibration_step3").css( 'display', 'block' );
+		} else {
+			calibrate_step3()
+		}
+
+}
+
+function calibrate_step3() {
+
+		$("#calibration_step0").css( 'display', 'none' );
+		$("#calibration_step1").css( 'display', 'none' );
+		$("#calibration_step2").css( 'display', 'none' );
+		$("#calibration_step3").css( 'display', 'none' );
+		$("#calibration_step4").css( 'display', 'none' );
+		$("#calibration_step5").css( 'display', 'none' );
+		$("#calibration_step1_enter").css( 'display', 'none' );
+		$("#calibration_step2_enter").css( 'display', 'none' );
+		$("#calibration_step3_enter").css( 'display', 'none' );
+		$("#calibration_step4").css( 'display', 'block' );
+		if ( $("#step3_enabled").val() == "1" ) {
+			if ( $("#step3_enter_value").val() == "1" ) {
+				if ( $("#step3_measured_value").val() == "" ) {
+					// Send Precommand here
+					command = $("#address").val() + ":" + $("#step3_precommand").val() + "," + $("#step3_target").val().replaceAll(",", ".");
+					console.log ("Sending PreCommand: " + command);
+					sendcommand(command);
+					$("#calibration_step3_enter").css( 'display', 'block' );
+					return;
+				} else {
+					// Send Cal command here
+					command = $("#address").val() + ":" + $("#step3_command").val() + "," + $("#step3_measured_value").val().replaceAll(",", ".");
+					console.log ("Sending Command: " + command);
+					sendcommand(command);
+				}
+			} else {
+				// Send Cal command here
+				command = $("#address").val() + ":" + $("#step3_command").val() + "," + $("#step3_target").val().replaceAll(",", ".");
+				console.log ("Sending Command: " + command);
+				sendcommand(command);
+			}
+		}
+
+}
+
+function calibrate_step4() {
+
+		// Stop Calibration Mode here
+		sendcommand("plugin:start");
+		$("#calibration_step0").css( 'display', 'none' );
+		$("#calibration_step1").css( 'display', 'none' );
+		$("#calibration_step2").css( 'display', 'none' );
+		$("#calibration_step3").css( 'display', 'none' );
+		$("#calibration_step4").css( 'display', 'none' );
+		$("#calibration_step5").css( 'display', 'none' );
+		$("#calibration_step1_enter").css( 'display', 'none' );
+		$("#calibration_step2_enter").css( 'display', 'none' );
+		$("#calibration_step3_enter").css( 'display', 'none' );
+
+		// End Message
+		$("#calibration_value").css( 'display', 'none' );
+		$("#calibration_value_box").css( 'display', 'none' );
+		$("#calibration_step5").css( 'display', 'block' );
+
+}
+
+function sendcommand( accommand ) {
+
+	$.ajax( { 
+			url:  'ajax.cgi',
+			type: 'POST',
+			data: { 
+				action: 'sendcommand',
+				command: accommand
+			}
+		} )
+	.fail(function( data ) {
+		console.log( "SSendcommand Fail", data );
+	})
+	.done(function( data ) {
+		console.log( "Sendcommand Success", data );
+	})
+	.always(function( data ) {
+		console.log( "Sendcommand Finished", data );
+		return (data)
+	});
 
 }
 
