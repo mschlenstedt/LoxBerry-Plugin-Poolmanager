@@ -477,7 +477,9 @@ while True:
                 elif command == "calibrate":
                     log.info("Start calibration mode.")
                     client.publish(pretopic + "/plugin/calibration_mode",1,retain=1)
+                    client.publish(pretopic + "/plugin/pause",0,retain=1)
                     calibrate = 1
+                    stop = 0
                     valuecycle = 1.5
                     response = "Success plugin: calibrate"
                 # Read Status
