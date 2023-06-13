@@ -1,2 +1,2 @@
 # LoxBerry-Plugin-Poolmanager
-A LoxBerry Plugin. LoxWiki: [https://www.loxwiki.eu/](https://wiki.loxberry.de/plugins/loxberry_poolmanager/start)
+A LoxBerry Plugin. LoxWiki: https://wiki.loxberry.de/plugins/loxberry_poolmanager/start
