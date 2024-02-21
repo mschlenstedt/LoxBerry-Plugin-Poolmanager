@@ -29,6 +29,7 @@ cyclemode=1
 singlevaluemode=1
 calibrationmode=0
 displaytimeout=120
+cycletime=3
 lastactiontimeout=30
 display=1
 i=0
@@ -100,10 +101,16 @@ def readconfig():
         with open(lbpconfigdir + '/plugin.json') as f:
             global pconfig
             global devices
+            global displaytimeout
+            global cycletime
+            global pretopic
             global totaldevices
             pconfig = json.load(f)
         # Main Topic
         pretopic = pconfig['topic']
+        # Times
+        displaytimeout = int(pconfig['lcd']['displaytimeout'])
+        cycletime = int(pconfig['lcd']['cycletime'])
         # Parse snesors and actors
         for item in pconfig['sensors']:
             if int(item["lcd"]) > 0:
@@ -288,7 +295,7 @@ lcd = Character_LCD_RGB_I2C(i2c, 16, 2)
 lcd.clear()
 display_on()
 lcd.message = "PoolManager\nVersion " + pluginversion
-time.sleep(3)
+time.sleep(int(cycletime))
 lcd.clear()
 
 # Loop
@@ -307,7 +314,7 @@ while True:
     now = time.time()
 
     # Turn display off after timeout
-    if now > lastaction + displaytimeout and cyclemode:
+    if now > lastaction + displaytimeout and cyclemode and displaytimeout > 0:
         display_off()
 
     # If not in Cycle Mode and not in Calibration Mode and Timeout reached, return to Cycle Mode
@@ -317,7 +324,7 @@ while True:
         singlevaluemode = 0
 
     # Update Display in Cylce Mode
-    if now > last + 3 and cyclemode:
+    if now > last + cycletime and cyclemode:
         show_measurement(i)
         last = now
         i += 1
@@ -345,12 +352,14 @@ while True:
     elif lcd.up_button:
         time.sleep(0.3)
         log.debug("Up Button pressed!")
+        lastaction = now
         if cyclemode and display == 0:
             display_on()
 
     elif lcd.down_button:
         time.sleep(0.3)
         log.debug("Down Button pressed!")
+        lastaction = now
         if cyclemode and display == 0:
             display_on()
 
@@ -377,6 +386,7 @@ while True:
     elif lcd.select_button:
         time.sleep(0.3)
         log.debug("Select Button pressed!")
+        lastaction = now
         if cyclemode and display == 0:
             display_on()
 
