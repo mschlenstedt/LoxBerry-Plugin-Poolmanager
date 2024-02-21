@@ -110,6 +110,12 @@ sub start
 
 	unlink ("/dev/shm/poolmanager-watchdog-stop.dat");
 
+
+	# Read config
+	my $cfgfile = $lbpconfigdir . "/plugin.json";
+	my $jsonobj = LoxBerry::JSON->new();
+	my $cfg = $jsonobj->open(filename => $cfgfile);
+
 	$log->default;
 	my $count = `pgrep -c -f "python3 atlasi2c-gateway.py"`;
 	chomp ($count);
@@ -125,10 +131,20 @@ sub start
 		logdir => "$lbplogdir",
 		addtime => 1,
 	);
+	my $lcdlog;
+	if ( is_enabled($cfg->{"lcd"}->{"active"}) ) {
+		$lcdlog = LoxBerry::Log->new (  name => "lcd-display",
+			package => 'poolmanager',
+			logdir => "$lbplogdir",
+			addtime => 1,
+		);
+	}
 	if ($verbose) {
 		$poolmanagerlog->loglevel(7);
+		$lcdlog->loglevel(7) if is_enabled($cfg->{"lcd"}->{"active"});
 	}
 	my $logfile = $poolmanagerlog->filename();
+	my $logfile_lcd = $lcdlog->filename() if is_enabled($cfg->{"lcd"}->{"active"});
 
 	# Loglevel
 	my $loglevel = "INFO";
@@ -148,7 +164,23 @@ sub start
 		exec "cd $lbpbindir && python3 $lbpbindir/atlasi2c-gateway.py --logfile=$logfile --loglevel=$loglevel --logdbkey=$dbkey";
 		die "Couldn't exec myprogram: $!";
 	}
-	sleep 5;
+
+	if ( is_enabled($cfg->{"lcd"}->{"active"}) ) {
+		$log->default;
+		LOGINF "Starting LCD Display (lcd_display)...";
+
+		$lcdlog->default;
+		LOGSTART "Starting LCD Display (lcd_display)...";
+		my $dbkey = $lcdlog->dbkey;
+		my $child_pid_lcd = fork();
+		die "Couldn't fork" unless defined $child_pid_lcd;
+		if (! $child_pid_lcd) {
+			exec "cd $lbpbindir && python3 $lbpbindir/lcd_display.py --logfile=$logfile_lcd --loglevel=$loglevel --logdbkey=$dbkey";
+			die "Couldn't exec myprogram: $!";
+		}
+	}
+
+	sleep 2;
 
 	my $count = `pgrep -c -f "atlasi2c-gateway.py"`;
 	chomp ($count);
@@ -175,6 +207,8 @@ sub stop
 	$log->default;
 	LOGINF "Stopping PoolManager (atlasi2c-gateway)...";
 	system ("pkill -f 'atlasi2c-gateway.py' > /dev/null 2>&1");
+	LOGINF "Stopping LCD Display (lcd_display)...";
+	system ("pkill -f 'lcd_display.py' > /dev/null 2>&1");
 	sleep 2;
 
 	my $count = `pgrep -c -f "atlasi2c-gateway.py"`;

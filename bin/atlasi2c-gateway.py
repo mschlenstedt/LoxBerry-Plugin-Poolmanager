@@ -152,10 +152,10 @@ def getstatus():
                 continue
             values_arr = response.split(": ")[1].split(",")
             origcommand = response.split(": ")[1].split(",")[0]
-            print ("RESPONSE: " )
-            print (response.encode('utf-8'))
-            print ("ORIGNINAL COMMAND: ")
-            print (origcommand.encode('utf-8'))
+            #print ("RESPONSE: " )
+            #print (response.encode('utf-8'))
+            #print ("ORIGNINAL COMMAND: ")
+            #print (origcommand.encode('utf-8'))
             address = response.split(": ")[0].split(" ")[2]
             log.debug("Sensor response: %s" % response)
             if response.startswith("Success"):
@@ -371,10 +371,10 @@ log.addHandler(fileHandler)
 
 # Logging Starting message
 log.setLevel(logging.INFO)
-log.info("Starting Logfile for acsensors.py. The Loglevel is %s" % loglevel.upper())
+log.info("Starting Logfile for atlasi2c-gateway.py. The Loglevel is %s" % loglevel.upper())
 log.setLevel(numeric_loglevel)
 
-log.debug("Enironment:")
+log.debug("Environment:")
 for k, v in os.environ.items():
     log.debug(f'{k}={v}')
 
