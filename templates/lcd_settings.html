@@ -1,0 +1,271 @@
+<style>
+.datahidden {
+	display:none;
+}
+
+.tiny {
+	font-size:70%;
+}
+
+.small {
+	font-size:80%;
+}
+
+.middle {
+	font-size:120%;
+}
+
+.big {
+	font-size:250%;
+}
+
+.large {
+	font-size:400%;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.grayed {
+	color: gray;
+}
+
+.center {
+	text-align: center;
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	grid-column-gap: 15px;
+	grid-row-gap: 15px;
+	text-shadow: none;
+}
+
+.box { 
+	border: 1px solid black;
+	border-radius: 5px 5px 5px 5px;
+	padding: 5px;
+}
+
+.boxtitle {
+	background-color: #6dac20;
+	color: white;
+	text-shadow: 1px 1px 2px black;
+	border-radius: 5px 5px 5px 5px;
+	padding: 5px;
+	vertical-align: middle;
+}
+
+.boxrow {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
+	align-items: center;
+	padding: 0;
+	margin: 0;
+}
+
+.boxitem {
+	padding: 5px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.servicestatus {
+	display: grid;
+	grid-template-columns: auto auto auto auto;
+	grid-template-rows: 1fr;
+	gap: 0px 10px;
+	justify-content: center;
+	justify-items: center;
+	align-items: center;
+	text-shadow: none;
+}
+
+.margin {
+	margin: 10px;
+}
+
+.status {
+	padding: 7px;
+	box-sizing: border-box;
+	border-radius: 5px 5px 5px 5px;
+	background: #dfdfdf;
+	border: 1px solid #7E7E7E;
+	width: 170px;
+	text-align: center;
+}
+
+.ui-popup-container
+{
+	width:  50%;
+	height: 80%;
+}
+
+</style>
+
+<div class="grid">
+	<form id="form_lcd">
+	<div>
+		<h2 class="boxtitle ui-title">
+			<span style="vertical-align:middle"><img src="./images/hardware_title_32.png"></span>
+			<TMPL_VAR "LCD.LABEL_LCD">
+		</h2>
+		<div class="box">
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR "LCD.LABEL_LCD">
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="checkbox" name ="active_lcd" id="active_lcd" data-mini="true">
+						<label for="active_lcd"><TMPL_VAR LCD.LABEL_ACTIVE></label>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_CYCLETIME>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="cycletime_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_CYCLETIME_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_DISPLAYTIMEOUT>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="displaytimeout_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_DISPLAYTIMEOUT_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%; text-align: left;">
+						<h3><TMPL_VAR LCD.LABEL_EXTERNALVALUE> 1</h3>
+					</div>
+					<div class="boxitem" style="width:50%">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_EXTERNALVALUENAME>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="value1name_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_EXTERNALVALUENAME_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_EXTERNALVALUEUNIT>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="value1unit_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_EXTERNALVALUEUNIT_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%; text-align: left;">
+						<h3><TMPL_VAR LCD.LABEL_EXTERNALVALUE> 2</h3>
+					</div>
+					<div class="boxitem" style="width:50%">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_EXTERNALVALUENAME>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="value2name_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_EXTERNALVALUENAME_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_EXTERNALVALUEUNIT>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="value2unit_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_EXTERNALVALUEUNIT_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%; text-align: left;">
+						<h3><TMPL_VAR LCD.LABEL_EXTERNALVALUE> 3</h3>
+					</div>
+					<div class="boxitem" style="width:50%">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_EXTERNALVALUENAME>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="value3name_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_EXTERNALVALUENAME_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_EXTERNALVALUEUNIT>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="value3unit_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_EXTERNALVALUEUNIT_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%; text-align: left;">
+						<h3><TMPL_VAR LCD.LABEL_EXTERNALVALUE> 4</h3>
+					</div>
+					<div class="boxitem" style="width:50%">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_EXTERNALVALUENAME>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="value4name_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_EXTERNALVALUENAME_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_EXTERNALVALUEUNIT>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="value4unit_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_EXTERNALVALUEUNIT_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%; text-align: left;">
+						<h3><TMPL_VAR LCD.LABEL_EXTERNALVALUE> 5</h3>
+					</div>
+					<div class="boxitem" style="width:50%">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_EXTERNALVALUENAME>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="value5name_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_EXTERNALVALUENAME_HINT>">
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 15%">
+						<TMPL_VAR LCD.LABEL_EXTERNALVALUEUNIT>
+					</div>
+					<div class="boxitem" style="width:50%">
+						<input type="text" id="value5unit_lcd" data-mini="true" value="" placeholder="<TMPL_VAR LCD.LABEL_EXTERNALVALUEUNIT_HINT>">
+					</div>
+			</div>
+			<br><br>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 90%">
+						<a href="#" onclick="save_lcd(); return false;" class="ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-check ui-corner-all"><TMPL_VAR "COMMON.BUTTON_SAVE"></a>
+					</div>
+			</div>
+			<div class="boxrow">
+					<div class="boxitem small" style="width: 90%">
+						<span id="savinghint_lcd">&nbsp;</span>
+					</div>
+			</div>
+		</div>
+	</div>
+	</form>
+</div>

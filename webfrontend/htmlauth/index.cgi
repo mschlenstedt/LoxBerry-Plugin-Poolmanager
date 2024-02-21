@@ -75,7 +75,7 @@ if( $q->{ajax} ) {
 	# Create symbolic link to measurements
 	my $res = qx (ln -s /dev/shm/poolmanager-measurements.json $lbphtmlauthdir/measurements.json);
 
-	# Default is gpio_settings form
+	# Default is measurements_settings form
 	$q->{form} = "measurements" if !$q->{form};
 
 	if ($q->{form} eq "atlas") {
@@ -92,6 +92,11 @@ if( $q->{ajax} ) {
 		my $templatefile = "$lbptemplatedir/general_settings.html";
 		$template = LoxBerry::System::read_file($templatefile);
 		&form_settings();
+	}
+	elsif ($q->{form} eq "lcd") {
+		my $templatefile = "$lbptemplatedir/lcd_settings.html";
+		$template = LoxBerry::System::read_file($templatefile);
+		&form_lcd();
 	}
 	else {
 		my $templatefile = "$lbptemplatedir/measurements_settings.html";
@@ -136,6 +141,19 @@ sub form_measurements
 ##########################################################################
 
 sub form_settings
+{
+	# Prepare template
+	&preparetemplate();
+
+	return();
+}
+
+
+##########################################################################
+# Form: LCD
+##########################################################################
+
+sub form_lcd
 {
 	# Prepare template
 	&preparetemplate();
@@ -190,6 +208,10 @@ sub preparetemplate
 	$navbar{20}{Name} = "$L{'COMMON.LABEL_ATLAS'}";
 	$navbar{20}{URL} = 'index.cgi?form=atlas';
 	$navbar{20}{active} = 1 if $q->{form} eq "atlas";
+
+	$navbar{25}{Name} = "$L{'COMMON.LABEL_LCD'}";
+	$navbar{25}{URL} = 'index.cgi?form=lcd';
+	$navbar{25}{active} = 1 if $q->{form} eq "lcd";
 	
 	$navbar{30}{Name} = "$L{'COMMON.LABEL_SETTINGS'}";
 	$navbar{30}{URL} = 'index.cgi?form=settings';

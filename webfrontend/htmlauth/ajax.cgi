@@ -265,6 +265,42 @@ if( $q->{action} eq "savesettings" ) {
 	
 }
 
+if( $q->{action} eq "savelcd" ) {
+
+	# Check if all required parameters are defined
+	if (!defined $q->{'cycletime'} || $q->{'cycletime'} eq "") {
+		$q->{'cycletime'} = "3";
+	}
+	if (!defined $q->{'displaytimeout'} || $q->{'displaytimeout'} eq "") {
+		$q->{'displaytimeout'} = "180";
+	}
+
+	# Load config
+	require LoxBerry::JSON;
+	my $cfgfile = "$lbpconfigdir/plugin.json";
+	my $jsonobj = LoxBerry::JSON->new();
+	my $cfg = $jsonobj->open(filename => $cfgfile);
+	
+	# Save
+	$cfg->{'lcd'}->{'active'} = $q->{'active'} > 0 ? $q->{'active'} : "0";;
+	$cfg->{'lcd'}->{'cycletime'} = $q->{'cycletime'};
+	$cfg->{'lcd'}->{'displaytimeout'} = $q->{'displaytimeout'};
+	$cfg->{'lcd'}->{'external_values'} = [];
+	for (my $i = 0; $i <= 4; $i++) {
+		my $v = $i + 1;
+		my %ev = (
+			address => "value$v",
+			name => $q->{'value' . $v . 'name'},
+			lcd_unit => $q->{'value' . $v . 'unit'},
+		);
+		push @{$cfg->{'lcd'}->{'external_values'}}, \%ev;
+	}
+	$jsonobj->write();
+
+	$response = encode_json( $cfg );
+	
+}
+
 if( $q->{action} eq "sendcommand" ) {
 
 	if (!defined $q->{'command'} || $q->{'command'} eq "") {

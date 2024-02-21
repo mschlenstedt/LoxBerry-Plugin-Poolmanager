@@ -516,6 +516,56 @@ function save_settings() {
 
 }
 
+// Save LCD-DISPLAY (save to config)
+
+function save_lcd() {
+
+	$("#savinghint_lcd").attr("style", "color:blue").html("<TMPL_VAR "COMMON.HINT_SAVING">");
+	if ( $("#active_lcd").is(":checked") ) {
+		activelcd = "1";
+	} else {
+		activelcd = "0";
+	}
+	$.ajax( { 
+			url:  'ajax.cgi',
+			type: 'POST',
+			data: { 
+				action: 'savelcd',
+				active: activelcd,
+				cycletime: $("#cycletime_lcd").val(),
+				displaytimeout: $("#displaytimeout_lcd").val(),
+				value1name: $("#value1name_lcd").val(),
+				value2name: $("#value2name_lcd").val(),
+				value3name: $("#value3name_lcd").val(),
+				value4name: $("#value4name_lcd").val(),
+				value5name: $("#value5name_lcd").val(),
+				value1unit: $("#value1unit_lcd").val(),
+				value2unit: $("#value2unit_lcd").val(),
+				value3unit: $("#value3unit_lcd").val(),
+				value4unit: $("#value4unit_lcd").val(),
+				value5unit: $("#value5unit_lcd").val(),
+			}
+		} )
+	.fail(function( data ) {
+		console.log( "save_lcd Fail", data );
+		var jsonresp = JSON.parse(data.responseText);
+		$("#savinghint_lcd").attr("style", "color:red").html("<TMPL_VAR "COMMON.HINT_SAVING_FAILED">" + " Error: " + jsonresp.error + " (Statuscode: " + data.status + ").");
+	})
+	.done(function( data ) {
+		console.log( "save_lcd Done", data );
+		if (data.error) {
+			$("#savinghint_lcd").attr("style", "color:red").html("<TMPL_VAR "COMMON.HINT_SAVING_FAILED">" + " Error: " + data.error + ").");
+		} else {
+			$("#savinghint_lcd").attr("style", "color:green").html("<TMPL_VAR "COMMON.HINT_SAVING_SUCCESS">" + ".");
+			getconfig();
+		}
+	})
+	.always(function( data ) {
+		console.log( "save_lcd Finished", data );
+	});
+
+}
+
 // GET CONFIG
 
 function getconfig() {
@@ -535,7 +585,7 @@ function getconfig() {
 		console.log( "getconfig Success", data );
 		$("#main").css( 'visibility', 'visible' );
 
-		// CALIBRATION
+		// Calibration
 
 		calibrate = "<TMPL_VAR CALIBRATE>";
 		address = "<TMPL_VAR ADDRESS>";
@@ -545,6 +595,19 @@ function getconfig() {
 		$("#statuscycle_settings").val(data.statuscycle);
 		$("#valuescycle_settings").val(data.valuecycle);
 		$("#topic_settings").val(data.topic);
+
+		// LCD Display
+
+		$("#cycletime_lcd").val(data.lcd.cycletime);
+		$("#displaytimeout_lcd").val(data.lcd.displaytimeout);
+		if ( data.lcd.active == "1" ) {
+			$("#active_lcd").prop('checked', true).checkboxradio('refresh');
+		}
+		ev = data.lcd.external_values;
+		$.each( ev, function( intDevId, item){
+			$("#" + item.address + "name_lcd").val(item.name);
+			$("#" + item.address + "unit_lcd").val(item.lcd_unit);
+		})
 
 		// Sensors
 
@@ -576,14 +639,14 @@ function getconfig() {
 				$('<td style="text-align:left;">'+item.address+'<\/td>').appendTo(row);
 				$('<td />', { html: '\
 				<a href="javascript:popup_edit_sensor(\'' + item.name + '\')" id="btneditsensor_'+item.name+'" name="btneditsensor_'+item.name+'" \
-                                title="<TMPL_VAR COMMON.BUTTON_EDIT> ' + item.name + '"> \
-                                <img src="./images/settings_20.png" height="20"></img></a> \
-                                <a href="javascript:popup_delete_sensor(\'' + item.name + '\')" id="btnaskdeletesensor_'+item.name+'"\
+				title="<TMPL_VAR COMMON.BUTTON_EDIT> ' + item.name + '"> \
+				<img src="./images/settings_20.png" height="20"></img></a> \
+				<a href="javascript:popup_delete_sensor(\'' + item.name + '\')" id="btnaskdeletesensor_'+item.name+'"\
 				name="btnaskdeletesensor_'+item.name+'" \
-                                title="<TMPL_VAR COMMON.BUTTON_DELETE> ' + item.name + '"> \
-                                <img src="./images/cancel_20.png" height="20"></img></a> \
-                                ' }).appendTo(row);
-                                $(row).trigger("create");
+				title="<TMPL_VAR COMMON.BUTTON_DELETE> ' + item.name + '"> \
+				<img src="./images/cancel_20.png" height="20"></img></a> \
+				' }).appendTo(row);
+				$(row).trigger("create");
 				// Box for Calibration Form
 				if ( document.getElementById("calibration_overview") && calibrate != "1") {
 				        calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'>\
@@ -688,14 +751,14 @@ function getconfig() {
 				$('<td style="text-align:left;">'+item.address+'<\/td>').appendTo(row);
 				$('<td />', { html: '\
 				<a href="javascript:popup_edit_actor(\'' + item.name + '\')" id="btneditactor_'+item.name+'" name="btneditactor_'+item.name+'" \
-                                title="<TMPL_VAR COMMON.BUTTON_EDIT> ' + item.name + '"> \
-                                <img src="./images/settings_20.png" height="20"></img></a> \
-                                <a href="javascript:popup_delete_actor(\'' + item.name + '\')" id="btnaskdeleteactor_'+item.name+'" \
+				title="<TMPL_VAR COMMON.BUTTON_EDIT> ' + item.name + '"> \
+				<img src="./images/settings_20.png" height="20"></img></a> \
+				<a href="javascript:popup_delete_actor(\'' + item.name + '\')" id="btnaskdeleteactor_'+item.name+'" \
 				name="btnaskdeleteactor_'+item.name+'" \
-                                title="<TMPL_VAR COMMON.BUTTON_DELETE> ' + item.name + '"> \
-                                <img src="./images/cancel_20.png" height="20"></img></a> \
-                                ' }).appendTo(row);
-                                $(row).trigger("create");
+				title="<TMPL_VAR COMMON.BUTTON_DELETE> ' + item.name + '"> \
+				<img src="./images/cancel_20.png" height="20"></img></a> \
+				' }).appendTo(row);
+				$(row).trigger("create");
 				// Box for Calibration Form
 				if ( document.getElementById("calibration_overview") && calibrate != "1") {
 				        calibration_overview.innerHTML += "<div><h2 class='boxtitle ui-title'><span style='vertical-align:middle'>\
