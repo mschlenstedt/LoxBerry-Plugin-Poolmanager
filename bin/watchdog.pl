@@ -166,6 +166,7 @@ sub start
 	}
 
 	if ( is_enabled($cfg->{"lcd"}->{"active"}) ) {
+		sleep 5;
 		$log->default;
 		LOGINF "Starting LCD Display (lcd_display)...";
 
