@@ -249,12 +249,12 @@ log.info("Connecting to Broker %s on port %s." % (mqttconfig['server'], str(mqtt
 client.connect(mqttconfig['server'], port = int(mqttconfig['port']))
 
 # Subscriptions for PoolManager measurements
-pretopic = pconfig['topic']
 for y in devices:
-    topic = pretopic + "/" + devices[y]["address"] + "/" + devices[y]["lcd_value"]
-    log.debug("Subscribe to: " + topic)
-    client.subscribe(topic, qos=0)
-    client.on_message = on_message
+    if devices[y]["address"].isdigit():
+        topic = pretopic + "/" + devices[y]["address"] + "/" + devices[y]["lcd_value"]
+        log.info("Subscribe to: " + topic)
+        client.subscribe(topic, qos=0)
+        client.on_message = on_message
 
 # Subscriptions for External measurements
 add_values = pconfig['lcd']['external_values']
@@ -263,9 +263,15 @@ for ev in add_values:
         topic = pretopic + "/lcd/" + ev["address"]
         client.publish(topic + "/name", ev["name"], retain=1)
         client.publish(topic + "/lcd_unit", ev["lcd_unit"], retain=1)
-        log.debug("Subscribe to: " + topic + "/value")
+        log.info("Subscribe to: " + topic + "/value")
         client.subscribe(topic + "/value", qos=0)
         client.on_message = on_message
+
+# Subscribe to the set/comand topic
+stopic = pretopic + "/set/command"
+log.info("Subscribe to: " + stopic)
+client.subscribe(stopic, qos=0)
+client.on_message = on_message
 
 # Start MQTT Loop
 client.loop_start()
@@ -302,12 +308,66 @@ lcd.clear()
 while True:
 
     # Check for any subscribed messages in the queue
+
     while not q.empty():
         message = q.get()
-        x = str(message.topic).replace(pconfig["topic"] + "/", "").replace("lcd/", "").split("/")
-        measurements[x[0]] = { x[1] : str(message.payload.decode("utf-8")) }
-        log.debug("Received measurement: " + str(message.topic) + " " + str(message.payload.decode("utf-8")))
-   
+        response = ""
+
+        log.debug("Received subscription: " + str(message.topic) + " " + str(message.payload.decode("utf-8")))
+
+        if message is None or str(message.payload.decode("utf-8")) == "0":
+            continue
+
+        # New measurement for external or internal value
+        if "value" in message.topic:
+            log.debug("Received measurement: " + str(message.topic) + " " + str(message.payload.decode("utf-8")))
+            x = str(message.topic).replace(pconfig["topic"] + "/", "").replace("lcd/", "").split("/")
+            measurements[x[0]] = { x[1] : str(message.payload.decode("utf-8")) }
+            log.debug("Measurements: " + str(measurements))
+
+        # Check for valid command
+        elif ":" in message.payload.decode("utf-8"):
+            log.info("--> Received command: %s <--" % str(message.payload.decode("utf-8")))
+            target = message.payload.decode("utf-8").split(":")[0].lower()
+            command = message.payload.decode("utf-8").split(":")[1].lower()
+            # Plugin commands
+            if target.startswith("plugin") and command.startswith("display"):
+                log.debug("This is a plugin command: %s" % str(command))
+                # Display on
+                if command == "display_on":
+                    log.info("Turn display on and keep it on.")
+                    display_on()
+                    displaytimeout=0
+                    response = "Success plugin: display_on"
+                # Display off
+                elif command == "display_off":
+                    log.info("Turn display off.")
+                    display_off()
+                    displaytimeout = int(pconfig['lcd']['displaytimeout'])
+                    response = "Success plugin: display_off"
+                # Display Auto
+                elif command == "display_auto":
+                    log.info("Turn display into auto mode.")
+                    display_on()
+                    displaytimeout = int(pconfig['lcd']['displaytimeout'])
+                    response = "Success plugin: display_auto"
+                else:
+                    log.error("Unknown command: I do not know your given command.")
+                    response = "Error plugin: Unknown command"
+            else:
+                log.error("This command seems to be for atlasi2c-gateway. I will ingore it. %s" % str(message.payload.decode("utf-8")))
+        else:
+            log.error("Unknown command. No target given with ':'. %s" % str(message.payload.decode("utf-8")))
+
+        # Set status of command queue
+        if response != "":
+            response = "Command==" + str(message.payload.decode("utf-8")) + "@@Response==" + str (response)
+            client.publish(pretopic + "/set/response",str(response),retain=1)
+            client.publish(pretopic + "/set/command","0",retain=1)
+            client.publish(pretopic + "/set/lastcommand",str(message.payload.decode("utf-8")),retain=1)
+
+    # Main program
+
     if i > totaldevices:
         i = 0
 

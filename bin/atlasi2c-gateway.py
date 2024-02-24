@@ -210,7 +210,7 @@ def getstatus():
                     log.error("Could not write to sensor %s." % str(dev.address))
             else:
                 sends[dev.address] = 0
-                
+
         time.sleep(delaytime)
 
         for dev in device_list:
@@ -245,7 +245,7 @@ def getstatus():
                         c += 1
 
 def getvalues():
-    
+
     values_dict = dict()
     delaytime = device.long_timeout
     for dev in device_list:
@@ -411,6 +411,7 @@ mqttpause = 0 # Just in Case we need a slow down...
 
 # Subscribe to the set/comand topic
 stopic = pretopic + "/set/command"
+log.info("Subscribe to: " + stopic)
 client.subscribe(stopic, qos=0)
 client.on_message = on_message
 
@@ -443,6 +444,8 @@ while True:
     # Check for any subscribed messages in the queue
     while not q.empty():
         message = q.get()
+        response = ""
+
         if message is None or str(message.payload.decode("utf-8")) == "0":
             continue
 
@@ -453,6 +456,12 @@ while True:
         if ":" in message.payload.decode("utf-8"):
             target = message.payload.decode("utf-8").split(":")[0].lower()
             command = message.payload.decode("utf-8").split(":")[1].lower()
+
+            # COmmands for LCD
+            if command.startswith("display"):
+                log.error("This command seems to be for lcd_display. I will ingore it. %s" % str(message.payload.decode("utf-8")))
+                continue
+
             # Plugin commands
             if target.startswith("plugin"):
                 log.debug("This is a plugin command: %s" % str(command))
@@ -524,10 +533,11 @@ while True:
             response = "Error: Unknown command. No target given with ':'."
 
         # Set status of command queue
-        response = "Command==" + str(message.payload.decode("utf-8")) + "@@Response==" + str (response)
-        client.publish(pretopic + "/set/response",str(response),retain=1)
-        client.publish(pretopic + "/set/command","0",retain=1)
-        client.publish(pretopic + "/set/lastcommand",str(message.payload.decode("utf-8")),retain=1)
+        if response != "":
+            response = "Command==" + str(message.payload.decode("utf-8")) + "@@Response==" + str (response)
+            client.publish(pretopic + "/set/response",str(response),retain=1)
+            client.publish(pretopic + "/set/command","0",retain=1)
+            client.publish(pretopic + "/set/lastcommand",str(message.payload.decode("utf-8")),retain=1)
 
     # Getting the current date and time
     now = time.time()
