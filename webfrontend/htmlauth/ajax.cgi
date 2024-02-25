@@ -282,6 +282,9 @@ if( $q->{action} eq "savelcd" ) {
 	my $cfg = $jsonobj->open(filename => $cfgfile);
 	
 	# Save
+	if ($cfg->{'lcd'} == "1") { # This is from old configs - reもove old settings for compatibility
+		undef($cfg->{'lcd'});
+	}
 	$cfg->{'lcd'}->{'active'} = $q->{'active'} > 0 ? $q->{'active'} : "0";;
 	$cfg->{'lcd'}->{'cycletime'} = $q->{'cycletime'};
 	$cfg->{'lcd'}->{'displaytimeout'} = $q->{'displaytimeout'};
