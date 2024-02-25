@@ -133,6 +133,15 @@ def readconfig():
 
 def readmeasurements():
     try:
+        counter=0
+        mfile = '/dev/shm/poolmanager-measurements.json'
+        while not os.path.isfile(mfile): #wait in loop
+            log.info("Wait for measurements file from atlasi2c-gateway...")
+            time.sleep(1)
+            counter+=1
+            if counter > 60:
+                log.critical("Measurements file does not exist. Maybe a problem with the gateway. I will exist now. %s." % mfile)
+                exit()
         with open('/dev/shm/poolmanager-measurements.json') as f:
             global measurements
             measurements = json.load(f)
