@@ -1,2 +1,2 @@
 #!/bin/bash
-REPLACELBPBINDIR/watchdog.pl --action=start --verbose=0
+REPLACELBPBINDIR/watchdog.pl --action=check --verbose=0
