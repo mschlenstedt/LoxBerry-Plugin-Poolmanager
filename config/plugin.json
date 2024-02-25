@@ -1,7 +1,38 @@
 {
    "actors" : [],
-   "lcd" : 1,
    "sensors" : [],
+   "lcd" : {
+      "active" : "0",
+      "cycletime" : "3",
+      "displaytimeout" : "120",
+      "external_values" : [
+         {
+            "address" : "value1",
+            "lcd_unit" : "",
+            "name" : ""
+         },
+         {
+            "address" : "value2",
+            "lcd_unit" : "",
+            "name" : ""
+         },
+         {
+            "address" : "value3",
+            "lcd_unit" : "",
+            "name" : ""
+         },
+         {
+            "address" : "value4",
+            "lcd_unit" : "",
+            "name" : ""
+         },
+         {
+            "address" : "value5",
+            "lcd_unit" : "",
+            "name" : ""
+         }
+      ]
+   },
    "statuscycle" : "3600",
    "topic" : "poolmanager",
    "valuecycle" : "5"
