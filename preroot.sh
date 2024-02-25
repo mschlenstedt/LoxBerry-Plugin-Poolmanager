@@ -10,5 +10,8 @@ ARGV5=$5 # Fifth argument is Base folder of LoxBerry
 echo "<INFO> Adding LoxBerry User to i2c group"
 usermod -a -G i2c loxberry
 
+echo "<INFO> Installing Adafruit LCD DIsplay library"
+pip3 install adafruit-circuitpython-charlcd
+
 # Exit with Status 0
 exit 0
