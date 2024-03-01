@@ -285,6 +285,10 @@ if( $q->{action} eq "savelcd" ) {
 	if ($cfg->{'lcd'} == "1") { # This is from old configs - reもove old settings for compatibility
 		undef($cfg->{'lcd'});
 	}
+
+	# Ensure that the object is existing befor we add values to it
+	$cfg->{'lcd'} ||= {};
+	
 	$cfg->{'lcd'}->{'active'} = $q->{'active'} > 0 ? $q->{'active'} : "0";;
 	$cfg->{'lcd'}->{'cycletime'} = $q->{'cycletime'};
 	$cfg->{'lcd'}->{'displaytimeout'} = $q->{'displaytimeout'};
