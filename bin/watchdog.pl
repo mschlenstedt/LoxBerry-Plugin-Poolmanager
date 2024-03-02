@@ -108,8 +108,9 @@ exit (0);
 sub start
 {
 
-	unlink ("/dev/shm/poolmanager-watchdog-stop.dat");
-
+	if (-e  "$lbpconfigdir/gateway_stopped.cfg") {
+		unlink("$lbpconfigdir/gateway_stopped.cfg");
+	}
 
 	# Read config
 	my $cfgfile = $lbpconfigdir . "/plugin.json";
@@ -203,7 +204,7 @@ sub start
 sub stop
 {
 
-	$response = LoxBerry::System::write_file("/dev/shm/poolmanager-watchdog-stop.dat", "1");
+	$response = LoxBerry::System::write_file("$lbpconfigdir/gateway_stopped.cfg", "1");
 
 	$log->default;
 	LOGINF "Stopping PoolManager (atlasi2c-gateway)...";
@@ -246,7 +247,12 @@ sub check
 
 	$log->default;
 	LOGINF "Checking Status of PoolManager...";
-	
+
+	if (-e  "$lbpconfigdir/gateway_stopped.cfg") {
+		LOGOK "PoolManager was stopped manually. Nothing to do.";
+		return(0);
+	}
+
 	my $count = `pgrep -c -f "atlasi2c-gateway.py"`;
 	chomp ($count);
 	$count--; # Perl `` itself runs pgrep with sh, which also match -f in pgrep
@@ -255,10 +261,10 @@ sub check
 		my $fails = LoxBerry::System::read_file("/dev/shm/poolmanager-watchdog-fails.dat");
 		chomp ($fails);
 		$fails++;
-		my $response = LoxBerry::System::write_file("/dev/shm/poolmanager-watchdog-fails.dat", "$fails");
 		if ($fails > 9) {
 			LOGERR "Too many failures. Will stop watchdogging... Check your configuration and start service manually.";
 		} else {
+			my $response = LoxBerry::System::write_file("/dev/shm/poolmanager-watchdog-fails.dat", "$fails");
 			&restart();
 		}
 	} else {
@@ -269,5 +275,15 @@ sub check
 	}
 
 	return(0);
+
+}
+
+##
+## Always execute when Script ends
+##
+END {
+
+	LOGEND "This is the end - My only friend, the end...";
+	LoxBerry::System::unlock(lockfile => 'poolmanager-watchdog');
 
 }
