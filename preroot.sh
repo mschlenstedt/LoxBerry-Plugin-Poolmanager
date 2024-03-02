@@ -12,7 +12,7 @@ usermod -a -G i2c loxberry
 
 echo "<INFO> Installing Adafruit LCD Display library"
 yes | python3 -m pip install adafruit-circuitpython-charlcd
-INSTALLED=$(python3 -m pip list --format=columns | grep -i "Adafruit-CharLCD" | grep -v grep | wc -l)
+INSTALLED=$(python3 -m pip list --format=columns | grep -i "adafruit-circuitpython-charlcd" | grep -v grep | wc -l)
 if [ ${INSTALLED} -ne "0" ]; then
 	echo "<OK>  Adafruit LCD Display library installed successfully."
 else
