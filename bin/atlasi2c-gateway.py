@@ -47,8 +47,23 @@ def on_connect(client, userdata, flags, rc):
     if rc==0:
         client.connected_flag=True #set flag
         log.info("MQTT: Connected OK")
+        # IMPORTANT: (re-)subscribe on EVERY connect. With clean_session=True the
+        # broker drops all subscriptions on disconnect, so after an automatic
+        # reconnect the command topic would no longer be delivered unless we
+        # subscribe again here. Subscribing only once at startup caused the
+        # gateway to keep publishing values but silently stop accepting commands.
+        client.subscribe(stopic, qos=1)
+        log.info("MQTT: (Re-)subscribed to: %s" % stopic)
     else:
-        log.critical("MQTT: Bad connection, Returned code=",rc)
+        client.connected_flag=False
+        log.critical("MQTT: Bad connection, returned code=%s" % str(rc))
+
+def on_disconnect(client, userdata, rc):
+    client.connected_flag=False
+    if rc != 0:
+        log.warning("MQTT: Unexpected disconnect (rc=%s). paho will auto-reconnect and on_connect will re-subscribe." % str(rc))
+    else:
+        log.info("MQTT: Disconnected (rc=0).")
 
 def on_message(client, userdata, message):
     q.put(message)
@@ -89,8 +104,8 @@ def readconfig():
         for i in devices:
             nameascii = remove_non_ascii(devices[i]["name"].replace(" ", ""))
             device_list.append(AtlasI2C(address = int(i), moduletype = devices[i]["type"], name = nameascii[:16]))
-    except:
-        log.critical("Cannot read plugin configuration")
+    except Exception as e:
+        log.critical("Cannot read plugin configuration: %s" % str(e))
         sys.exit()
 
 def readstatusconfig():
@@ -98,8 +113,8 @@ def readstatusconfig():
         with open(lbpdatadir + '/status.json') as f:
             global sconfig
             sconfig = json.load(f)
-    except:
-        log.critical("Cannot read status configuration")
+    except Exception as e:
+        log.critical("Cannot read status configuration: %s" % str(e))
         sys.exit()
 
 def exit_handler(a="", b=""):
@@ -124,31 +139,31 @@ def getstatus():
         if "initial" in sconfig[dev.moduletype]:
             log.info("Initial commands found for device %s" % str(dev.address))
             # Initial values - do not send any data to broker, just configure sensor
-            for q in sconfig[dev.moduletype]["initial"].split("++"):
-                log.debug("Sending command %s for sensor %s" % (str(q), str(dev.address)))
+            for cmd in sconfig[dev.moduletype]["initial"].split("++"):
+                log.debug("Sending command %s for sensor %s" % (str(cmd), str(dev.address)))
                 try:
-                    dev.write(q)
-                except:
-                    log.error("Could not write to sensor %s." % str(dev.address))
+                    dev.write(cmd)
+                except Exception as e:
+                    log.error("Could not write to sensor %s: %s" % (str(dev.address), str(e)))
     time.sleep(delaytime)
     # Commands equal for all sensors
     commands = sconfig["all"]
     log.info("Updating status equal for all devices")
-    for q in commands:
+    for key in commands:
         for dev in device_list:
-            log.debug("Sending command %s for sensor %s" % (str(commands[q]), str(dev.address)))
+            log.debug("Sending command %s for sensor %s" % (str(commands[key]), str(dev.address)))
             try:
-                dev.write(commands[q])
-            except:
-                log.error("Could not write to sensor %s." % str(dev.address))
+                dev.write(commands[key])
+            except Exception as e:
+                log.error("Could not write to sensor %s: %s" % (str(dev.address), str(e)))
 
         time.sleep(delaytime)
 
         for dev in device_list:
             try:
                 response = dev.read().rstrip('\x00').strip()
-            except:
-                log.error("Could not read from sensor %s." % str(dev.address))
+            except Exception as e:
+                log.error("Could not read from sensor %s: %s" % (str(dev.address), str(e)))
                 continue
             values_arr = response.split(": ")[1].split(",")
             origcommand = response.split(": ")[1].split(",")[0]
@@ -160,9 +175,9 @@ def getstatus():
             log.debug("Sensor response: %s" % response)
             if response.startswith("Success"):
                 found = 0
-                for q in commands:
-                    if str("?" + commands[q].split(",")[0]).upper().startswith(str(origcommand.upper())):
-                        command = q
+                for key in commands:
+                    if str("?" + commands[key].split(",")[0]).upper().startswith(str(origcommand.upper())):
+                        command = key
                         found = 1
                         break
                 if found != 1:
@@ -185,10 +200,10 @@ def getstatus():
     for dev in device_list:
         commandlist.clear()
         if dev.moduletype in sconfig:
-            for q in sconfig[dev.moduletype]:
-                if q == "initial":
+            for key in sconfig[dev.moduletype]:
+                if key == "initial":
                     continue
-                commandlist.append(sconfig[dev.moduletype][q])
+                commandlist.append(sconfig[dev.moduletype][key])
             commandlists[dev.address] = commandlist.copy()
         else:
             log.error("Cannot find config for module type %s" % str(dev.moduletype))
@@ -206,8 +221,8 @@ def getstatus():
                 log.debug("Sending command %s for sensor %s" % (str(commandlists[dev.address][i-1]), str(dev.address)))
                 try:
                     dev.write(commandlists[dev.address][i-1])
-                except:
-                    log.error("Could not write to sensor %s." % str(dev.address))
+                except Exception as e:
+                    log.error("Could not write to sensor %s: %s" % (str(dev.address), str(e)))
             else:
                 sends[dev.address] = 0
 
@@ -217,8 +232,8 @@ def getstatus():
             if sends[dev.address] == 1:
                 try:
                     response = dev.read().rstrip('\x00').strip()
-                except:
-                    log.error("Could not read from sensor %s." % str(dev.address))
+                except Exception as e:
+                    log.error("Could not read from sensor %s: %s" % (str(dev.address), str(e)))
                     continue
                 values_arr = response.split(": ")[1].split(",")
                 origcommand = response.split(": ")[1].split(",")[0]
@@ -227,9 +242,9 @@ def getstatus():
                 if response.startswith("Success"):
                     commands = sconfig[dev.moduletype]
                     found = 0
-                    for q in commands:
-                        if str("?" + commands[q].split(",")[0]).upper().startswith(str(origcommand.upper())):
-                            command = q
+                    for key in commands:
+                        if str("?" + commands[key].split(",")[0]).upper().startswith(str(origcommand.upper())):
+                            command = key
                             found = 1
                             break
                     if found != 1:
@@ -253,14 +268,14 @@ def getvalues():
         try:
             dev.write("R")
             values_dict[dev.address] = {}
-        except:
-            log.error("Could not write to sensor %s." % str(dev.address))
+        except Exception as e:
+            log.error("Could not write to sensor %s: %s" % (str(dev.address), str(e)))
     time.sleep(delaytime)
     for dev in device_list:
         try:
             response = dev.read().rstrip('\x00').strip()
-        except:
-            log.error("Could not read from sensor %s." % str(dev.address))
+        except Exception as e:
+            log.error("Could not read from sensor %s: %s" % (str(dev.address), str(e)))
             continue
         values_arr = response.split(": ")[1].split(",")
         address = response.split(": ")[0].split(" ")[2]
@@ -282,8 +297,8 @@ def getvalues():
         try:
             with open('/dev/shm/poolmanager-measurements.json', 'w', encoding='utf-8') as f:
                 json.dump(values_dict, f, ensure_ascii=False, indent=4)
-        except:
-            log.error("Could not save values to temporary json file for %s." % str(dev.address))
+        except Exception as e:
+            log.error("Could not save values to temporary json file for %s: %s" % (str(dev.address), str(e)))
 
 def setnames():
     for dev in device_list:
@@ -291,17 +306,19 @@ def setnames():
         log.debug("Sending command name,%s for sensor %s" % (str(dev.name), str(dev.address)))
         try:
             dev.write("name,"+dev.name)
-        except:
-            log.error("Could not write to sensor %s." % str(dev.address))
+        except Exception as e:
+            log.error("Could not write to sensor %s: %s" % (str(dev.address), str(e)))
 
 def sendcmd(address, command):
     log.info("Send command %s for sensor %s" % (str(command), str(address)))
-    device.set_i2c_address(int(address))
+    response = ""
     try:
+        device.set_i2c_address(int(address))
         response = device.query(str(command))
         log.debug("Sensor response: %s" % response)
-    except:
-        log.error("An error occurred Query '%s'." % str(command))
+    except Exception as e:
+        log.error("An error occurred Query '%s': %s" % (str(command), str(e)))
+        return "Error: could not query device %s (%s)" % (str(address), str(e))
 
     return response.rstrip('\x00').strip()
 
@@ -393,29 +410,31 @@ if mqttconfig['server'] == "" or mqttconfig['port'] == "":
 readconfig()
 readstatusconfig()
 
+# Main Topic
+pretopic = pconfig['topic']
+mqttpause = 0 # Just in Case we need a slow down...
+
+# Topic we subscribe to for incoming commands. Must be defined before connecting,
+# because on_connect (which does the subscribe) can fire as soon as the loop runs.
+stopic = pretopic + "/set/command"
+
 # Conncect to broker
 client = mqtt.Client()
 client.connected_flag=False
 client.on_connect = on_connect
+client.on_disconnect = on_disconnect
+client.on_message = on_message
 
 if mqttconfig['username'] and mqttconfig['password']:
     log.info("Using MQTT Username and password.")
     client.username_pw_set(username = mqttconfig['username'],password = mqttconfig['password'])
 
 log.info("Connecting to Broker %s on port %s." % (mqttconfig['server'], str(mqttconfig['port'])))
+log.info("Will subscribe to: " + stopic)
 client.connect(mqttconfig['server'], port = int(mqttconfig['port']))
 
-# Main Topic
-pretopic = pconfig['topic']
-mqttpause = 0 # Just in Case we need a slow down...
-
-# Subscribe to the set/comand topic
-stopic = pretopic + "/set/command"
-log.info("Subscribe to: " + stopic)
-client.subscribe(stopic, qos=0)
-client.on_message = on_message
-
-# Start MQTT Loop
+# Start MQTT Loop. paho handles automatic reconnection; the subscription is
+# (re-)established in on_connect on every (re-)connect.
 client.loop_start()
 
 # Wait for connection
